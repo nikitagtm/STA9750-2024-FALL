@@ -1,20 +1,33 @@
 ---
 title: "Transit Data Analysis"
-author: "Nikita Gautam"
 format: html
 editor: visual
 ---
 
-# Install Required Packages
+### Description
+Following page will analyze Fiscal Characteristics of Major US Public Transit Systems using publicly available data. Description of this problem can be found here:   [Mini-Project #01](https://michael-weylandt.com/STA9750/miniprojects/mini00.html). 
+
+### Data Sources
+
+We will use data from the [National Transit Database](https://www.transit.dot.gov/ntd) as our primary source. In particular, since we want to analyze farebox revenues, total number of trips, total number of vehicle miles traveled, and total revenues and expenses by source, we will need to analyze several different tables. (Clicking link will download the files.)
+
+-   The [2022 Fare Revenue](https://www.transit.dot.gov/sites/fta.dot.gov/files/2024-04/2022%20Fare%20Revenue.xlsx) table
+-   July [Monthly Ridership](July 2024 Complete Monthly Ridership (with adjustments and estimates)_240903.xlsx) tables
+-   The [2022 Operating Expenses](https://data.transportation.gov/api/views/dkxx-zjd6/rows.csv?date=20231102&accessType=DOWNLOAD&bom=true&format=true) reports
+
+## Library Setup
+### Install Required Packages
+We will be analyzing various data from various sources. Following libraries are needed for this analysis. First check if the library is already installed and then install if not installed. 
 
 ```{r warning=FALSE,message=FALSE}
-if(!require("tidyverse")) install.packages("tidyverse")
-if(!require("lubridate")) install.packages("lubridate")
-if(!require("DT")) install.packages("DT")
-
+if (!require("tidyverse")) install.packages("tidyverse")
+if (!require("lubridate")) install.packages("lubridate")
+if (!require("DT")) install.packages("DT")
 ```
 
-# Load the packages
+
+### Load the packages
+Once the packages are installed, those will be loaded to the workspace so that they can be used later. 
 
 ```{r warning=FALSE,message=FALSE}
 library(tidyverse)
@@ -24,51 +37,78 @@ library(lubridate)
 library(DT)
 ```
 
-# Loading Fare Revenue Data
 
-```{r}
+## Load Data
+Since we have now setup libraries, we will now download the data to our project so that we can use later. You might get an error when trying to download the file programmatically. If the error persists, download the files manually and rename those and copy them to project folder. 
+
+### Loading Fare Revenue Data
+We will first Load Fare revenue data from [2022 Fare Revenue](https://www.transit.dot.gov/sites/fta.dot.gov/files/2024-04/2022%20Fare%20Revenue.xlsx) table. This table Contains data on revenues a transit agency earns from carrying passengers, organized by mode and type of service. Reported as funds earned, funds expended on operations, and funds expended on capital.
+
+
+```{r warning=FALSE,message=FALSE}
 # Let's start with Fare Revenue
 library(tidyverse)
-if(!file.exists("2022_fare_revenue.xlsx")){
+if (!file.exists("2022_fare_revenue.xlsx")) {
   # This should work _in theory_ but in practice it's still a bit finicky
   # If it doesn't work for you, download this file 'by hand' in your
   # browser and save it as "2022_fare_revenue.xlsx" in your project
   # directory.
-  download.file("https://www.transit.dot.gov/sites/fta.dot.gov/files/2024-04/2022%20Fare%20Revenue.xlsx",
-                destfile="2022_fare_revenue.xlsx",
-                quiet=FALSE,
-                method="wget")
+  download.file("http://www.transit.dot.gov/sites/fta.dot.gov/files/2024-04/2022%20Fare%20Revenue.xlsx",
+    destfile = "2022_fare_revenue.xlsx",
+    quiet = FALSE,
+    method = "wget"
+  )
 }
 FARES <- readxl::read_xlsx("2022_fare_revenue.xlsx") |>
-  select(-`State/Parent NTD ID`,
-         -`Reporter Type`,
-         -`Reporting Module`,
-         -`TOS`,
-         -`Passenger Paid Fares`,
-         -`Organization Paid Fares`) |>
+  select(
+    -`State/Parent NTD ID`,
+    -`Reporter Type`,
+    -`Reporting Module`,
+    -`TOS`,
+    -`Passenger Paid Fares`,
+    -`Organization Paid Fares`
+  ) |>
   filter(`Expense Type` == "Funds Earned During Period") |>
-  select(-`Expense Type`)
+  select(-`Expense Type`) |>
+  group_by(
+    `NTD ID`, # Sum over different `TOS` for the same `Mode`
+    `Agency Name`, # These are direct operated and sub-contracted
+    `Mode`
+  ) |> # of the same transit modality
+  # Not a big effect in most munis (significant DO
+  # tends to get rid of sub-contractors), but we'll sum
+  # to unify different passenger experiences
+  summarize(`Total Fares` = sum(`Total Fares`)) |>
+  ungroup()
 ```
 
-# Next load Expenses
+
+
+
+### Next load Expenses
+The 2022 Annual dataset containing data on expenses applied to operate public transportation services for each agency, by mode, and type of service operated. Divides expenses among NTD expense functions and object classes.
+
 
 ```{r warning=FALSE,message=FALSE}
 # Next, expenses
-if(!file.exists("2022_expenses.csv")){
+if (!file.exists("2022_expenses.csv")) {
   # This should work _in theory_ but in practice it's still a bit finicky
   # If it doesn't work for you, download this file 'by hand' in your
   # browser and save it as "2022_expenses.csv" in your project
   # directory.
   download.file("https://data.transportation.gov/api/views/dkxx-zjd6/rows.csv?date=20231102&accessType=DOWNLOAD&bom=true&format=true",
-                destfile="2022_expenses.csv",
-                quiet=FALSE,
-                method="wget")
+    destfile = "2022_expenses.csv",
+    quiet = FALSE,
+    method = "wget"
+  )
 }
 EXPENSES <- readr::read_csv("2022_expenses.csv") |>
-  select(`NTD ID`,
-         `Agency`,
-         `Total`,
-         `Mode`) |>
+  select(
+    `NTD ID`,
+    `Agency`,
+    `Total`,
+    `Mode`
+  ) |>
   mutate(`NTD ID` = as.integer(`NTD ID`)) |>
   rename(Expenses = Total) |>
   group_by(`NTD ID`, `Mode`) |>
@@ -77,83 +117,117 @@ EXPENSES <- readr::read_csv("2022_expenses.csv") |>
 ```
 
 # Merge two and create Financials
+We won't need all the information from both the tables. So let's just join these two tables on columnn NTD ID and Mode since both are present in both the tables and create FINANCIALs.
 
 ```{r}
 FINANCIALS <- inner_join(FARES, EXPENSES, join_by(`NTD ID`, `Mode`))
 ```
 
-# Display few rows
-```{r}
-sample_n(FINANCIALS, 1000) |>
-  DT::datatable()
-```
 
-
-
-```{r}
+### Monthly Transit Numbers
+We will now load Contains monthly-updated service information reported by urban Full Reporters. 
+```{r warning=FALSE,message=FALSE}
 # Monthly Transit Numbers
 library(tidyverse)
-if(!file.exists("ridership.xlsx")){
+if (!file.exists("ridership.xlsx")) {
   # This should work _in theory_ but in practice it's still a bit finicky
   # If it doesn't work for you, download this file 'by hand' in your
   # browser and save it as "ridership.xlsx" in your project
   # directory.
   download.file("https://www.transit.dot.gov/sites/fta.dot.gov/files/2024-09/July%202024%20Complete%20Monthly%20Ridership%20%28with%20adjustments%20and%20estimates%29_240903.xlsx",
-                destfile="ridership.xlsx",
-                quiet=FALSE,
-                method="wget")
+    destfile = "ridership.xlsx",
+    quiet = FALSE,
+    method = "wget"
+  )
 }
-TRIPS <- readxl::read_xlsx("ridership.xlsx", sheet="UPT") |>
+TRIPS <- readxl::read_xlsx("ridership.xlsx", sheet = "UPT") |>
   filter(`Mode/Type of Service Status` == "Active") |>
-  select(-`Legacy NTD ID`,
-         -`Reporter Type`,
-         -`Mode/Type of Service Status`,
-         -`UACE CD`,
-         -`TOS`) |>
+  select(
+    -`Legacy NTD ID`,
+    -`Reporter Type`,
+    -`Mode/Type of Service Status`,
+    -`UACE CD`,
+    -`TOS`
+  ) |>
   pivot_longer(-c(`NTD ID`:`3 Mode`),
-               names_to="month",
-               values_to="UPT") |>
+    names_to = "month",
+    values_to = "UPT"
+  ) |>
   drop_na() |>
-  mutate(month=my(month)) # Parse _m_onth _y_ear date specs
-MILES <- readxl::read_xlsx("ridership.xlsx", sheet="VRM") |>
+  mutate(month = my(month)) # Parse _m_onth _y_ear date specs
+MILES <- readxl::read_xlsx("ridership.xlsx", sheet = "VRM") |>
   filter(`Mode/Type of Service Status` == "Active") |>
-  select(-`Legacy NTD ID`,
-         -`Reporter Type`,
-         -`Mode/Type of Service Status`,
-         -`UACE CD`,
-         -`TOS`) |>
+  select(
+    -`Legacy NTD ID`,
+    -`Reporter Type`,
+    -`Mode/Type of Service Status`,
+    -`UACE CD`,
+    -`TOS`
+  ) |>
   pivot_longer(-c(`NTD ID`:`3 Mode`),
-               names_to="month",
-               values_to="VRM") |>
+    names_to = "month",
+    values_to = "VRM"
+  ) |>
   drop_na() |>
-  group_by(`NTD ID`, `Agency`, `UZA Name`,
-           `Mode`, `3 Mode`, month) |>
+  group_by(
+    `NTD ID`, `Agency`, `UZA Name`,
+    `Mode`, `3 Mode`, month
+  ) |>
   summarize(VRM = sum(VRM)) |>
   ungroup() |>
-  mutate(month=my(month)) # Parse _m_onth _y_ear date specs
+  mutate(month = my(month)) # Parse _m_onth _y_ear date specs
+```
 
+### Create USAGE by joining two tables
+
+```{r warning=FALSE,message=FALSE}
 USAGE <- inner_join(TRIPS, MILES) |>
   mutate(`NTD ID` = as.integer(`NTD ID`))
+```
 
-
-if(!require("DT")) install.packages("DT")
-library(DT)
-
+Now, let's review the data so far. 
+```{r}
 sample_n(USAGE, 1000) |>
-  mutate(month=as.character(month)) |>
-  DT::datatable()
+  mutate(month = as.character(month)) |>
+  DT::datatable(options = list(
+    pageLength = 5
+  ))
+```
+
+## Tasks
+Now, we will complete the tasks mentioned in this [page](https://michael-weylandt.com/STA9750/miniprojects/mini01.html)
+
+::: callout-tip
+### Task 1 - Creating Syntatic Names
+
+Rename a column: `UZA Name` to `metro_area`.
 
 
-# Rename a column: UZA Name to metro_area.
+```{r}
 USAGE <- USAGE |> rename(metro_area = "UZA Name")
+```
 
+We will also rename few other columns to make them more readable
+```{r}
+USAGE <- USAGE |>
+  rename(Passenger_Trips = UPT, Vehicle_Miles = VRM)
+```
+
+:::
+
+::: callout-tip
+#### Task 2: Recoding the `Mode` column
+##### Find Unique Modes and Print.
+```{r}
 unique_modes <- USAGE |>
   distinct(Mode)
 
-# To view the result:
 print(unique_modes)
+```
 
-# Get Actual Interpretation
+Now we will get the meaning of these symbols from [NDT](https://www.transit.dot.gov/ntd/national-transit-database-ntd-glossary) website. Once we have the meaning for each Acronyms, we will replace using `case-when`.
+
+```{r}
 USAGE <- USAGE |>
   mutate(Mode = case_when(
     Mode == "DR" ~ "Demand Response",
@@ -174,120 +248,163 @@ USAGE <- USAGE |>
     Mode == "IP" ~ "Inclined Plane",
     Mode == "PB" ~ "Publico",
     Mode == "CC" ~ "Cable Car",
-    TRUE ~ "Unknown"))
-
-if(!require("DT")) install.packages("DT")
-library(DT)
-
-
+    TRUE ~ "Unknown"
+  ))
+```
+:::
 
 
-USAGE <- USAGE |>
-  rename(Passenger_Trips = UPT, Vehicle_Miles = VRM)
+::: callout-tip
+### Task 3: Answering Instructor Specified Questions with `dplyr`
 
-sample_n(USAGE, 1000) |>
-  mutate(month=as.character(month)) |>
-  DT::datatable()
-
-
-# 1. What transit agency had the most total VRM in this sample?
+#### 1. What transit agency had the most total VRM in this sample?
+```{r}
 USAGE |>
   group_by(Agency) |>
-  summarize(Total_VRM = sum(Vehicle_Miles, na.rm=TRUE)) |>
+  summarize(Total_VRM = sum(Vehicle_Miles, na.rm = TRUE)) |>
   arrange(desc(Total_VRM)) |>
-  head(1)
+  datatable(
+    options = list(pageLength = 1, dom = "t"), # Only display top row
+    rownames = FALSE
+  ) |>
+  formatRound("Total_VRM", digits = 0, mark = ",")
+```
 
+#### 2.  Display the result nicely using DT and format the number
+
+```{r}
 # 2. What transit mode had the most total VRM in this sample?
 USAGE |>
   group_by(Mode) |>
   summarize(Total_VRM = sum(Vehicle_Miles, na.rm=TRUE)) |>
   arrange(desc(Total_VRM)) |>
-  head(1)
+  datatable(options = list(pageLength = 1, dom = 't'),  # Only display top row
+          rownames = FALSE) |> 
+  formatRound("Total_VRM", digits = 0, mark = ",")
+```
 
-
-# 3. How many trips were taken on the NYC Subway (Heavy Rail) in May 2024?
-USAGE |>
+#### 3. How many trips were taken on the NYC Subway (Heavy Rail) in May 2024?
+```{r}
+total_trips <- USAGE |>
   filter(Agency == "MTA New York City Transit", Mode == "Heavy Rail", month == "2024-05-01") |>
-  summarize(Total_Trips = sum(Passenger_Trips, na.rm=TRUE))
+  summarize(Total_Trips = sum(Passenger_Trips, na.rm = TRUE)) |>
+  pull(Total_Trips)
 
-# 4. What mode of transport had the longest average trip in May 2024?
-USAGE |>
-  filter(month == "2024-05-01") |>
-  group_by(Mode) |>
-  summarize(Average_Trip_Length = sum(Vehicle_Miles, na.rm=TRUE) / sum(Passenger_Trips, na.rm=TRUE)) |>
-  arrange(desc(Average_Trip_Length)) |>
-  slice(1)
+message <- sprintf(
+  "There were %s trips taken on the NYC Subway (Heavy Rail) in May 2024.",
+  format(total_trips, big.mark = ",")
+)
 
+cat(message)
+```
 
-# 5. How much did NYC subway ridership fall between April 2019 and April 2020?
+#### 5. How much did NYC subway ridership fall between April 2019 and April 2020?
+To solve this, we will first find ridership for 2019 and 2020 separately. Then we will 
+subtract to get change and get percentage.
 
+```{r}
 # Filter and summarize data for April 2019
 april_2019 <- USAGE |>
   filter(Agency == "MTA New York City Transit", Mode == "Heavy Rail", month == "2019-04-01") |>
-  summarize(Total_Trips_2019 = sum(Passenger_Trips, na.rm=TRUE))
+  summarize(Total_Trips_2019 = sum(Passenger_Trips, na.rm = TRUE)) |>
+  pull(Total_Trips_2019)
+
 # Filter and summarize data for April 2020
 april_2020 <- USAGE |>
   filter(Agency == "MTA New York City Transit", Mode == "Heavy Rail", month == "2020-04-01") |>
-  summarize(Total_Trips_2020 = sum(Passenger_Trips, na.rm=TRUE)) |>
+  summarize(Total_Trips_2020 = sum(Passenger_Trips, na.rm = TRUE)) |>
   pull(Total_Trips_2020)
 
-# Calculate the absolute difference
-ridership_difference <- abs(april_2019 - april_2020)
+# Calculate the absolute difference and percentage drop
+ridership_difference <- april_2019 - april_2020
+percentage_drop <- (ridership_difference / april_2019) * 100
 
-# Print the difference
-print(ridership_difference)
+# Print the custom message with the result and percentage drop
+message <- sprintf(
+  "NYC subway ridership fell by %s trips between April 2019 and April 2020, which is a %.2f%% decrease.",
+  format(ridership_difference, big.mark = ","), percentage_drop
+)
+
+cat(message)
+```
+:::
 
 
 
-# 1. Which Metro Area has the Highest Ridership in 2022?
+::: callout-tip
+#### Task 4: Explore and Analyze
+
+Find three more interesting transit facts in this data other than those above.
+
+#### 1. Top 5 Transit Agencies by Total Passenger Trips
+
+```{r}
 USAGE |>
-  mutate(year = year(month)) |>
-  filter(year == 2022) |>
-  group_by(metro_area) |>
-  summarize(Total_UPT = sum(Passenger_Trips, na.rm=TRUE)) |>
-  arrange(desc(Total_UPT)) |>
-  slice(1)
+  group_by(Agency) |>
+  summarize(Total_Trips = sum(Passenger_Trips, na.rm = TRUE)) |>
+  arrange(desc(Total_Trips)) |>
+  head(5) |>
+  datatable(options = list(pageLength = 5, dom = "t"), rownames = FALSE) |>
+  formatRound("Total_Trips", digits = 0, mark = ",")
+```
 
-# 2. Which Mode of Transport has the Most Consistent Usage Throughout the Year?
- USAGE |>
-  mutate(year = year(month)) |>
-  filter(year == 2022) |>
-  group_by(Mode, month) |>
-  summarize(Total_UPT = sum(Passenger_Trips, na.rm=TRUE)) |>
+#### 2. Top 5 Transit Modes by Total Vehicle Miles
+
+```{r}
+
+top_modes_vrm <- USAGE |>
   group_by(Mode) |>
-  summarize(mean_UPT = mean(Total_UPT, na.rm=TRUE),
-            sd_UPT = sd(Total_UPT, na.rm=TRUE)) |>
-  mutate(CV = sd_UPT / mean_UPT) |>
-  arrange(CV) |>
-  slice(1)
+  summarize(Total_VRM = sum(Vehicle_Miles, na.rm = TRUE)) |>
+  arrange(desc(Total_VRM)) |>
+  head(5)
 
- # Longest Trip Month
- USAGE |>
-   mutate(Average_Trip_Length = Vehicle_Miles / Passenger_Trips) |>
-   group_by(month) |>
-   summarize(mean_trip_length = mean(Average_Trip_Length, na.rm=TRUE)) |>
-   arrange(desc(mean_trip_length)) |>
-   slice(10)
+datatable(top_modes_vrm, options = list(pageLength = 5, dom = "t"), rownames = FALSE) |>
+  formatRound("Total_VRM", digits = 0, mark = ",")
+
+```
+
+#### 3. Agencies with Largest Decrease in Ridership
+```{r}
+ridership_decline <- USAGE |>
+  group_by(Agency) |>
+  summarize(
+    Trips_2019 = sum(ifelse(month == "2019-04-01", Passenger_Trips, NA), na.rm = TRUE),
+    Trips_2020 = sum(ifelse(month == "2020-04-01", Passenger_Trips, NA), na.rm = TRUE)
+  ) |>
+  mutate(Decline = Trips_2019 - Trips_2020) |>
+  arrange(desc(Decline)) |>
+  head(5)
+
+datatable(ridership_decline, options = list(pageLength = 5, dom = "t"), rownames = FALSE) |>
+  formatRound(c("Trips_2019", "Trips_2020", "Decline"), digits = 0, mark = ",")
+```
+:::
 
 
+::: callout-tip
 
+#### Task 5: Table Summarization
 
+Create a new table from `USAGE` that has annual total (sum) `UPT` and `VRM`
+for 2022. This will require use of the `group_by`, `summarize`, and `filter`
+functions. You will also want to use the `year` function, to extract a year
+from the `month` column.
 
+The resulting table should have the following columns:
 
-sample_n(USAGE, 1000) |>
-  mutate(month=as.character(month)) |>
-  DT::datatable()
+-   `NTD ID`
+-   `Agency`
+-   `metro_area`
+-   `Mode`
+-   `UPT`
+-   `VRM`
 
+Make sure to `ungroup` your table after creating it.
 
+Name this table `USAGE_2022_ANNUAL`.
 
-# Ensure the `lubridate` package is loaded for working with dates
-if(!require("lubridate")) install.packages("lubridate")
-library(lubridate)
-
-# Ensure the `lubridate` package is loaded for working with dates
-if(!require("lubridate")) install.packages("lubridate")
-library(lubridate)
-
+This will be done with following command. 
+```{r warning=FALSE,message=FALSE}
 # Create the USAGE_2022_ANNUAL table
 USAGE_2022_ANNUAL <- USAGE |>
   # Extract the year from the month column
@@ -297,12 +414,31 @@ USAGE_2022_ANNUAL <- USAGE |>
   # Group by the necessary columns
   group_by(`NTD ID`, Agency, metro_area, Mode) |>
   # Summarize total UPT and VRM for the year
-  summarize(Passenger_Trips = sum(Passenger_Trips, na.rm=TRUE), Vehicle_Miles = sum(Vehicle_Miles, na.rm=TRUE)) |>
+  summarize(UPT = sum(Passenger_Trips, na.rm = TRUE), VRM = sum(Vehicle_Miles, na.rm = TRUE)) |>
   # Ungroup the table
   ungroup()
 
+```
 
-# Get Actual Interpretation
+Let's verify that all the columns are there. 
+
+```{r}
+cat(colnames(USAGE_2022_ANNUAL), sep = "\n")
+```
+:::
+
+
+Now, Let's join with `FINANCIALS` to create single table and create USAGE_AND_FINANCIALS. However, before joining, let's view the table Financials:
+
+```{r}
+FINANCIALS |>
+  DT::datatable(options = list(pageLength = 5))
+```
+
+
+Here we notice that Mode is Acronym. However, `USAGE_2022_ANNUAL` doesn't have acronyms. To make sure we can join both the table, let's change `FINANCIALS` mode to match `USAGE_2022_ANNUAL.`
+
+```{r}
 FINANCIALS <- FINANCIALS |>
   mutate(Mode = case_when(
     Mode == "DR" ~ "Demand Response",
@@ -323,74 +459,124 @@ FINANCIALS <- FINANCIALS |>
     Mode == "IP" ~ "Inclined Plane",
     Mode == "PB" ~ "Publico",
     Mode == "CC" ~ "Cable Car",
-    TRUE ~ "Unknown"))
+    TRUE ~ "Unknown"
+  ))
+```
+
+Now, let's join to create `USAGE_AND_FINANCIALS`. We will join `NTD ID` and `Mode` as they are present in both the tables to create `USAGE_AND_FINANCIALS`.     
+
+```{r}
+ USAGE_AND_FINANCIALS <- left_join(
+  USAGE_2022_ANNUAL,
+  FINANCIALS,
+  join_by(`NTD ID`, Mode)
+) |>
+  drop_na()
+```
 
 
-
-  USAGE_AND_FINANCIALS <- left_join(USAGE_2022_ANNUAL,
-                                    FINANCIALS,
-                                    join_by(`NTD ID`, Mode)) |> drop_na()
-
-  sample_n(USAGE_AND_FINANCIALS, 1000)
-
-  ## renames columns to make it easier later:
-  USAGE_AND_FINANCIALS <- USAGE_AND_FINANCIALS |> rename(Total_Fares = "Total Fares")
-
-  # 1. Which transit system (agency and mode) had the most UPT in 2022?
-  most_upt <- USAGE_AND_FINANCIALS |>
-    arrange(desc(Passenger_Trips)) |>
-    select(Agency, Mode, Passenger_Trips) |>
-    slice(1)
-
-  print(most_upt)
-
-  # 2. Which transit system (agency and mode) had the highest farebox recovery (Total Fares to Expenses)?
-  highest_farebox_recovery <- USAGE_AND_FINANCIALS |>
-    mutate(Farebox_Recovery = Total_Fares / Expenses) |>
-    arrange(desc(Farebox_Recovery)) |>
-    select(Agency, Mode, Farebox_Recovery) |>
-    slice(1)
-
-  print(highest_farebox_recovery)
-
-  # 3. Which transit system (agency and mode) has the lowest expenses per UPT?
-  lowest_expenses_per_upt <- USAGE_AND_FINANCIALS |>
-    mutate(Expenses_per_UPT = Expenses / Passenger_Trips) |>
-    arrange(Expenses_per_UPT) |>
-    select(Agency, Mode, Expenses_per_UPT) |>
-    slice(1)
-
-  print(lowest_expenses_per_upt)
+Let's view few records to make sure we have them:
+```{r}
+USAGE_AND_FINANCIALS |>
+  DT::datatable(options = list(pageLength = 5))
+```
 
 
-  # 4. Which transit system (agency and mode) has the highest total fares per UPT?
-  highest_fares_per_upt <- USAGE_AND_FINANCIALS |>
-    mutate(Fares_per_UPT = Total_Fares / Passenger_Trips) |>
-    arrange(desc(Fares_per_UPT)) |>
-    select(Agency, Mode, Fares_per_UPT) |>
-    slice(1)
-  print(highest_fares_per_upt)
+Before we answer the questions, we will rename few columns to make them more readable:
+```{r}
+USAGE_AND_FINANCIALS <- USAGE_AND_FINANCIALS |>
+  rename(Passenger_Trips = UPT, Vehicle_Miles = VRM)
+```
 
-  # 5. Which transit system (agency and mode) has the lowest expenses per VRM?
-  lowest_expenses_per_vrm <- USAGE_AND_FINANCIALS |>
-    mutate(Expenses_per_VRM = Expenses / Vehicle_Miles) |>
-    arrange(Expenses_per_VRM) |>
-    select(Agency, Mode, Expenses_per_VRM) |>
-    slice(1)
+::: callout-tip
+#### Task 6: Farebox Recovery Among Major Systems
 
-  print(lowest_expenses_per_vrm)
-
-  # 6. Which transit system (agency and mode) has the highest total fares per VRM?
-  highest_fares_per_vrm <- USAGE_AND_FINANCIALS |>
-    mutate(Fares_per_VRM = Total_Fares / Vehicle_Miles) |>
-    arrange(desc(Fares_per_VRM)) |>
-    select(Agency, Mode, Fares_per_VRM) |>
-    slice(1)
-
-  print(highest_fares_per_vrm)
+Using the `USAGE_AND_FINANCIALS` table, answer the following questions:
 
 
+#### 1. Which transit system (agency and mode) had the most UPT in 2022?
 
+```{r}
+ USAGE_AND_FINANCIALS |>
+  select(Agency, Mode, Passenger_Trips) |>
+  arrange(desc(Passenger_Trips)) |>
+  datatable(
+    options = list(pageLength = 1, dom = "t"), # Only display top row
+    rownames = FALSE
+  ) |>
+  formatRound("Passenger_Trips", digits = 0, mark = ",")
+```
 
+#### 2. Which transit system (agency and mode) had the highest farebox recovery (Total Fares to Expenses)?
+
+```{r}
+    USAGE_AND_FINANCIALS |>
+  mutate(Farebox_Recovery = `Total Fares` / Expenses) |>
+  arrange(desc(Farebox_Recovery)) |>
+  select(Agency, Mode, Farebox_Recovery) |>
+  datatable(
+    options = list(pageLength = 1, dom = "t"), # Only display top row
+    rownames = FALSE
+  ) |>
+  formatRound("Farebox_Recovery", digits = 0, mark = ",")
+```
+
+#### 3 Which transit system (agency and mode) has the lowest expenses per UPT?
+```{r}
+  USAGE_AND_FINANCIALS |>
+  mutate(Expenses_per_UPT = Expenses / Passenger_Trips) |>
+  arrange(Expenses_per_UPT) |>
+  select(Agency, Mode, Expenses_per_UPT) |>
+  datatable(
+    options = list(pageLength = 1, dom = "t"), # Only display top row
+    rownames = FALSE
+  ) |>
+  formatRound("Expenses_per_UPT", digits = 0, mark = ",")
 
 ```
+
+#### 4. Which transit system (agency and mode) has the highest total fares per UPT?
+```{r}
+  USAGE_AND_FINANCIALS |>
+   mutate(Fares_per_UPT = `Total Fares` / Passenger_Trips) |>
+   arrange(desc(Fares_per_UPT)) |>
+   select(Agency, Mode, Fares_per_UPT) |>
+   datatable(
+     options = list(pageLength = 1, dom = "t"), # Only display top row
+     rownames = FALSE
+   ) |>
+   formatRound("Fares_per_UPT", digits = 0, mark = ",")
+```
+
+
+#### 5. Which transit system (agency and mode) has the lowest expenses per VRM?
+```{r}
+  USAGE_AND_FINANCIALS |>
+   mutate(Expenses_per_VRM = Expenses / Vehicle_Miles) |>
+   arrange(Expenses_per_VRM) |>
+   select(Agency, Mode, Expenses_per_VRM) |>
+   datatable(
+     options = list(pageLength = 1, dom = "t"), # Only display top row
+     rownames = FALSE
+   ) |>
+   formatRound("Expenses_per_VRM", digits = 0, mark = ",")
+```
+
+#### 6. Which transit system (agency and mode) has the highest total fares per VRM?
+```{r}
+  USAGE_AND_FINANCIALS |>
+  mutate(Fares_per_VRM = `Total Fares` / Vehicle_Miles) |>
+  arrange(desc(Fares_per_VRM)) |>
+  select(Agency, Mode, Fares_per_VRM) |>
+  datatable(
+    options = list(pageLength = 1, dom = "t"), # Only display top row
+    rownames = FALSE
+  ) |>
+  formatRound("Fares_per_VRM", digits = 0, mark = ",")
+```
+:::
+
+```{r}
+
+## Conclusion
+This was an interesting assignment to understand basics DT operations using Transportation data. 
