@@ -4,8 +4,8 @@ format: html
 editor: visual
 ---
 
-### Description
-Following page will analyze Fiscal Characteristics of Major US Public Transit Systems using publicly available data. Description of this problem can be found here:   [Mini-Project #01](https://michael-weylandt.com/STA9750/miniprojects/mini00.html). 
+### Introduction
+This analysis will examine the fiscal characteristics of major U.S. public transit systems using publicly available data. For more details on the problem description, please refer to:   [Mini-Project #01](https://michael-weylandt.com/STA9750/miniprojects/mini01.html). The primary objective is to answer key questions related to transit agencies, focusing on areas such as farebox recovery performance, ridership trends, and operating expenses. The analysis will involve tasks such as renaming columns, recoding modes, and addressing instructor-specified questions using various transit data sources.
 
 ### Data Sources
 
@@ -39,7 +39,7 @@ library(DT)
 
 
 ## Load Data
-Since we have now setup libraries, we will now download the data to our project so that we can use later. You might get an error when trying to download the file programmatically. If the error persists, download the files manually and rename those and copy them to project folder. 
+Since we have now setup libraries, we will now download the data to our project so that we can use later fo our analysis. You might get an error when trying to download the file programmatically. If the error persists, download the files manually and rename those and copy them to project folder. 
 
 ### Loading Fare Revenue Data
 We will first Load Fare revenue data from [2022 Fare Revenue](https://www.transit.dot.gov/sites/fta.dot.gov/files/2024-04/2022%20Fare%20Revenue.xlsx) table. This table Contains data on revenues a transit agency earns from carrying passengers, organized by mode and type of service. Reported as funds earned, funds expended on operations, and funds expended on capital.
@@ -270,10 +270,9 @@ USAGE |>
   formatRound("Total_VRM", digits = 0, mark = ",")
 ```
 
-#### 2.  Display the result nicely using DT and format the number
+#### 2. What transit mode had the most total VRM in this sample?
 
 ```{r}
-# 2. What transit mode had the most total VRM in this sample?
 USAGE |>
   group_by(Mode) |>
   summarize(Total_VRM = sum(Vehicle_Miles, na.rm=TRUE)) |>
@@ -363,7 +362,7 @@ datatable(top_modes_vrm, options = list(pageLength = 5, dom = "t"), rownames = F
 
 ```
 
-#### 3. Agencies with Largest Decrease in Ridership
+#### 3. Top 5 Agencies with Largest Decrease in Ridership between 2019 and 2020
 ```{r}
 ridership_decline <- USAGE |>
   group_by(Agency) |>
@@ -579,4 +578,14 @@ Using the `USAGE_AND_FINANCIALS` table, answer the following questions:
 ```{r}
 
 ## Conclusion
-This was an interesting assignment to understand basics DT operations using Transportation data. 
+This was an interesting assignment to understand basics DT operations using Transportation data. Overall, this analysis provided valuable insights into the financial and operational performance of different transit agencies and modes. 
+  
+## Key points from this analysis
+
+1. MTA New York City Transit had the most passenger trips.
+2. NYC Subway saw a 91.28% drop in ridership between April 2019 and April 2020 due to COVID-19.
+3. Transit Authority of Central Kentucky’s Vanpool had the highest farebox recovery, covering costs effectively through fare revenue.
+4. North Carolina State University’s Motorbus service had the lowest expenses per passenger trip.
+5. The Motorbus mode, across all agencies, is the one that collects the most fare revenue for every mile the buses travel while carrying passengers.
+6. The transit system with the highest total fares per Vehicle Revenue Mile is the Chicago Water Taxi in the Ferryboat mode.
+
