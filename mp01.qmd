@@ -511,13 +511,14 @@ Using the `USAGE_AND_FINANCIALS` table, answer the following questions:
 ```{r}
     USAGE_AND_FINANCIALS |>
   mutate(Farebox_Recovery = `Total Fares` / Expenses) |>
+  filter(!is.na(`Expenses`) &`Expenses`>0) |>
   arrange(desc(Farebox_Recovery)) |>
   select(Agency, Mode, Farebox_Recovery) |>
   datatable(
     options = list(pageLength = 1, dom = "t"), # Only display top row
     rownames = FALSE
   ) |>
-  formatRound("Farebox_Recovery", digits = 0, mark = ",")
+  formatRound("Farebox_Recovery", mark = ",")
 ```
 
 #### 3 Which transit system (agency and mode) has the lowest expenses per UPT?
@@ -530,7 +531,7 @@ Using the `USAGE_AND_FINANCIALS` table, answer the following questions:
     options = list(pageLength = 1, dom = "t"), # Only display top row
     rownames = FALSE
   ) |>
-  formatRound("Expenses_per_UPT", digits = 0, mark = ",")
+  formatRound("Expenses_per_UPT", mark = ",")
 
 ```
 
@@ -544,7 +545,7 @@ Using the `USAGE_AND_FINANCIALS` table, answer the following questions:
      options = list(pageLength = 1, dom = "t"), # Only display top row
      rownames = FALSE
    ) |>
-   formatRound("Fares_per_UPT", digits = 0, mark = ",")
+   formatRound("Fares_per_UPT", mark = ",")
 ```
 
 
@@ -558,7 +559,7 @@ Using the `USAGE_AND_FINANCIALS` table, answer the following questions:
      options = list(pageLength = 1, dom = "t"), # Only display top row
      rownames = FALSE
    ) |>
-   formatRound("Expenses_per_VRM", digits = 0, mark = ",")
+   formatRound("Expenses_per_VRM", mark = ",")
 ```
 
 #### 6. Which transit system (agency and mode) has the highest total fares per VRM?
@@ -571,18 +572,21 @@ Using the `USAGE_AND_FINANCIALS` table, answer the following questions:
     options = list(pageLength = 1, dom = "t"), # Only display top row
     rownames = FALSE
   ) |>
-  formatRound("Fares_per_VRM", digits = 0, mark = ",")
+  formatRound("Fares_per_VRM", mark = ",")
 ```
 :::
 
 ```{r}
 
 ## Conclusion
-This was an interesting assignment to understand basics DT operations using Transportation data. Overall, this analysis provided valuable insights into the financial and operational performance of different transit agencies and modes. 
+
+In my view, the **Transit Authority of Central Kentucky's Vanpool** stands out as the most efficient transit system due to its **farebox recovery ratio exceeding 100%**, meaning it generates more fare revenue than its operating costs. This high level of financial self-sufficiency is uncommon in public transit and makes it highly efficient from a **financial sustainability** perspective.
+ 
+Overall, this  was an interesting assignment to understand basics DT operations using Transportation data. This analysis provided valuable insights into the financial and operational performance of different transit agencies and modes. 
   
 ## Key points from this analysis
 
-1. MTA New York City Transit had the most passenger trips.
+1. MTA New York City Transit had the most passenger trips in 2022.
 2. NYC Subway saw a 91.28% drop in ridership between April 2019 and April 2020 due to COVID-19.
 3. Transit Authority of Central Kentucky’s Vanpool had the highest farebox recovery, covering costs effectively through fare revenue.
 4. North Carolina State University’s Motorbus service had the lowest expenses per passenger trip.
