@@ -1,0 +1,15 @@
+{
+  "hash": "25bef7f966e1341570bb03da5ed2ec40",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Mini Project 2\"\neditor: visual\n---\n\n\n\n\n### Introduction\n\nThe goal of this project is to leverage data-driven insights to identify the key characteristics of successful movies and develop a compelling proposal for a new film. By analyzing historical IMDb data on movie ratings, genres, and key personnel, we aim to guide creative decisions with statistical evidence, ultimately proposing a high-potential movie idea that aligns with current industry trends and audience preferences.please refer to: [Mini-Project #02](https://michael-weylandt.com/STA9750/miniprojects/mini02.html)\n\n### Data Sources\n\nWe will use data from the[The IMDb non-commercial release](https://datasets.imdbws.com/). Specifically, we will use tables from the IMDb non-commercial release, which are made freely available for non-commercial use. This dataset provides comprehensive information about films, including ratings, genres, and key personnel, allowing us to analyze historical trends and develop a data-driven movie proposal.\n\n### Downloading Data Set\nFor this project, I used freely available IMDb non-commercial release tables. I implemented code to automatically download and load these large files into R, which initially took some time. To improve efficiency, I cached the code chunk, allowing the data to be saved and quickly reloaded without re-execution unless changes were made, significantly streamlining the process\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(knitr)\nknitr::opts_chunk$set(cache = TRUE, warning = FALSE, \n                      message = FALSE, cache.lazy = FALSE) \nget_imdb_file <- function(fname){\n    BASE_URL <- \"https://datasets.imdbws.com/\"\n    fname_ext <- paste0(fname, \".tsv.gz\")\n    if(!file.exists(fname_ext)){\n        FILE_URL <- paste0(BASE_URL, fname_ext)\n        download.file(FILE_URL, \n                      destfile = fname_ext)\n    }\n    as.data.frame(readr::read_tsv(fname_ext, lazy=FALSE))\n}\n\nNAME_BASICS      <- get_imdb_file(\"name.basics\")\nTITLE_BASICS     <- get_imdb_file(\"title.basics\")\nTITLE_EPISODES   <- get_imdb_file(\"title.episode\")\nTITLE_RATINGS    <- get_imdb_file(\"title.ratings\")\nTITLE_CREW       <- get_imdb_file(\"title.crew\")\n```\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

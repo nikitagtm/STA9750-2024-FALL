@@ -47,5 +47,26 @@
     "title": "Transit Data Analysis",
     "section": "Key points from this analysis",
     "text": "Key points from this analysis\n\nMTA New York City Transit had the most passenger trips in 2022.\nNYC Subway saw a 91.28% drop in ridership between April 2019 and April 2020 due to COVID-19.\nTransit Authority of Central Kentucky’s Vanpool had the highest farebox recovery, covering costs effectively through fare revenue.\nNorth Carolina State University’s Motorbus service had the lowest expenses per passenger trip.\nThe Motorbus mode, across all agencies, is the one that collects the most fare revenue for every mile the buses travel while carrying passengers.\nThe transit system with the highest total fares per Vehicle Revenue Mile is the Chicago Water Taxi in the Ferryboat mode."
+  },
+  {
+    "objectID": "mp02.html",
+    "href": "mp02.html",
+    "title": "Mini Project 2",
+    "section": "",
+    "text": "Introduction\nThe goal of this project is to leverage data-driven insights to identify the key characteristics of successful movies and develop a compelling proposal for a new film. By analyzing historical IMDb data on movie ratings, genres, and key personnel, we aim to guide creative decisions with statistical evidence, ultimately proposing a high-potential movie idea that aligns with current industry trends and audience preferences.please refer to: Mini-Project #02\n\n\nData Sources\nWe will use data from theThe IMDb non-commercial release. Specifically, we will use tables from the IMDb non-commercial release, which are made freely available for non-commercial use. This dataset provides comprehensive information about films, including ratings, genres, and key personnel, allowing us to analyze historical trends and develop a data-driven movie proposal.\n\n\nDownloading Data Set\nFor this project, I used freely available IMDb non-commercial release tables. I implemented code to automatically download and load these large files into R, which initially took some time. To improve efficiency, I cached the code chunk, allowing the data to be saved and quickly reloaded without re-execution unless changes were made, significantly streamlining the process\n\nlibrary(knitr)\nknitr::opts_chunk$set(cache = TRUE, warning = FALSE, \n                      message = FALSE, cache.lazy = FALSE) \nget_imdb_file &lt;- function(fname){\n    BASE_URL &lt;- \"https://datasets.imdbws.com/\"\n    fname_ext &lt;- paste0(fname, \".tsv.gz\")\n    if(!file.exists(fname_ext)){\n        FILE_URL &lt;- paste0(BASE_URL, fname_ext)\n        download.file(FILE_URL, \n                      destfile = fname_ext)\n    }\n    as.data.frame(readr::read_tsv(fname_ext, lazy=FALSE))\n}\n\nNAME_BASICS      &lt;- get_imdb_file(\"name.basics\")\nTITLE_BASICS     &lt;- get_imdb_file(\"title.basics\")\nTITLE_EPISODES   &lt;- get_imdb_file(\"title.episode\")\nTITLE_RATINGS    &lt;- get_imdb_file(\"title.ratings\")\nTITLE_CREW       &lt;- get_imdb_file(\"title.crew\")"
+  },
+  {
+    "objectID": "mp02.html#library-setup",
+    "href": "mp02.html#library-setup",
+    "title": "Mini Project 2",
+    "section": "Library Setup",
+    "text": "Library Setup\n\nInstall Required Packages\nWe will be analyzing various data from various sources. Following libraries are needed for this analysis. First check if the library is already installed and then install if not installed.\n\nif (!require(\"readr\")) install.packages(\"readr\") \nif (!require(\"dplyr\")) install.packages(\"dplyr\") \nif (!require(\"ggplot2\")) install.packages(\"ggplot2\")\nif (!require(\"stringr\")) install.packages(\"stringr\")\nif (!require(\"tidyr\")) install.packages(\"tidyr\")\n\n\n\nLoad the packages\nOnce the packages are installed, those will be loaded to the workspace so that they can be used later.\n\nlibrary(readr)\nlibrary(dplyr)\nlibrary(ggplot2)\nlibrary(stringr)\nlibrary(tidyr)"
+  },
+  {
+    "objectID": "mp02.html#load-data",
+    "href": "mp02.html#load-data",
+    "title": "Mini Project 2",
+    "section": "Load Data",
+    "text": "Load Data\nSince we have now setup libraries, we will now download the data to our project so that we can use later fo our analysis\n\nget_imdb_file &lt;- function(fname){\n    BASE_URL &lt;- \"https://datasets.imdbws.com/\"\n    fname_ext &lt;- paste0(fname, \".tsv.gz\")\n    if(!file.exists(fname_ext)){\n        FILE_URL &lt;- paste0(BASE_URL, fname_ext)\n        download.file(FILE_URL, \n                      destfile = fname_ext)\n    }\n    as.data.frame(readr::read_tsv(fname_ext, lazy=FALSE))\n}\n\nNAME_BASICS      &lt;- get_imdb_file(\"name.basics\")\n\n\nNAME_BASICS &lt;- get_imdb_file(\"name.basics\")\n\n\nTITLE_BASICS &lt;- get_imdb_file(\"title.basics\")\n\n\nTITLE_RATINGS &lt;- get_imdb_file(\"title.ratings\")\n\n\nTITLE_CREW &lt;- get_imdb_file(\"title.crew\")\n\n\nTITLE_PRINCIPALS &lt;- get_imdb_file(\"title.principals\")"
   }
 ]
