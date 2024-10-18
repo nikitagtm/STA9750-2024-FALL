@@ -3,6 +3,23 @@ title: "Mini Project 02"
 editor: visual
 ---
 
+### Introduction
+
+The goal of this project is to leverage data-driven insights to identify the key characteristics of successful movies and develop a compelling proposal for a new film. By analyzing historical IMDb data on movie ratings, genres, and key personnel, we aim to guide creative decisions with statistical evidence, ultimately proposing a high-potential movie idea that aligns with current industry trends and audience preferences.please refer to: [Mini-Project #02](https://michael-weylandt.com/STA9750/miniprojects/mini02.html)
+
+### Data Sources
+
+We will use data from the [The IMDb non-commercial release](https://datasets.imdbws.com/). Specifically, we will use tables from the IMDb non-commercial release, which are made freely available for non-commercial use. This dataset provides comprehensive information about films, including ratings, genres, and key personnel, allowing us to analyze historical trends and develop a data-driven movie proposal.
+
+### Downloading Data Set
+
+For this project, I used freely available IMDb non-commercial release tables. I implemented code to automatically download and load these large files into R, which initially took some time. To improve efficiency, I cached the code chunk, allowing the data to be saved and quickly reloaded without re-execution unless changes were made, significantly streamlining the process
+
+---
+title: "Mini Project 02"
+editor: visual
+---
+
 
 ```{r warning=FALSE,message=FALSE}
 library(tidyverse)
@@ -13,53 +30,57 @@ library(DT)
 ```
 
 ```{r warning=FALSE,message=FALSE}
-get_imdb_file <- function(fname){
-    BASE_URL <- "https://datasets.imdbws.com/"
-    fname_ext <- paste0(fname, ".tsv.gz")
-    rds_file <- paste0(fname, ".rds")
-    
-    # Check if the .rds file already exists
-    if(file.exists(rds_file)){
-        # Load the data from the saved .rds file
-        return(readRDS(rds_file))
-    } else {
-        # If the file doesn't exist, download and save the .rds file
-        if(!file.exists(fname_ext)){
-            FILE_URL <- paste0(BASE_URL, fname_ext)
-            download.file(FILE_URL, destfile = fname_ext)
-        }
-        df <- as.data.frame(readr::read_tsv(fname_ext, lazy = FALSE))
-        saveRDS(df, rds_file)  # Save the data as an .rds file for future use
-        return(df)
+library(data.table)
+
+
+get_imdb_file <- function(fname) {
+  BASE_URL <- "https://datasets.imdbws.com/"
+  fname_ext <- paste0(fname, ".tsv.gz")
+  rds_file <- paste0(fname, ".rds")
+
+  # Check if the .rds file already exists
+  if (file.exists(rds_file)) {
+    return(readRDS(rds_file)) # Load the data from the saved .rds file
+  } else {
+    # Download only if the .tsv.gz file does not exist
+    if (!file.exists(fname_ext)) {
+      FILE_URL <- paste0(BASE_URL, fname_ext)
+      download.file(FILE_URL, destfile = fname_ext, mode = "wb") # Ensure binary mode for downloading compressed files
     }
+    # Use data.table::fread for faster reading
+    df <- as.data.frame(fread(fname_ext))
+    saveRDS(df, rds_file, compress = FALSE)
+    return(df)
+  }
 }
 
+
 # Load IMDb data
-NAME_BASICS      <- get_imdb_file("name.basics")
-TITLE_BASICS     <- get_imdb_file("title.basics")
-TITLE_EPISODES   <- get_imdb_file("title.episode")
-TITLE_RATINGS    <- get_imdb_file("title.ratings")
-TITLE_CREW       <- get_imdb_file("title.crew")
+NAME_BASICS <- get_imdb_file("name.basics")
+TITLE_BASICS <- get_imdb_file("title.basics")
+TITLE_EPISODES <- get_imdb_file("title.episode")
+TITLE_RATINGS <- get_imdb_file("title.ratings")
+TITLE_CREW <- get_imdb_file("title.crew")
 TITLE_PRINCIPALS <- get_imdb_file("title.principals")
 ```
 
 
 ### Data Sampling
 ```{r warning=FALSE,message=FALSE}
-NAME_BASICS <- NAME_BASICS |> 
-    filter(str_count(knownForTitles, ",") > 1)
+NAME_BASICS <- NAME_BASICS |>
+  filter(str_count(knownForTitles, ",") > 1)
 ```
 
 ```{r warning=FALSE, message=FALSE}
 TITLE_RATINGS |>
-    ggplot(aes(x=numVotes)) + 
-    geom_histogram(bins=30) +
-    xlab("Number of IMDB Ratings") + 
-    ylab("Number of Titles") + 
-    ggtitle("Majority of IMDB Titles Have Less than 100 Ratings") + 
-    theme_bw() + 
-    scale_x_log10(label=scales::comma) + 
-    scale_y_continuous(label=scales::comma)
+  ggplot(aes(x = numVotes)) +
+  geom_histogram(bins = 30) +
+  xlab("Number of IMDB Ratings") +
+  ylab("Number of Titles") +
+  ggtitle("Majority of IMDB Titles Have Less than 100 Ratings") +
+  theme_bw() +
+  scale_x_log10(label = scales::comma) +
+  scale_y_continuous(label = scales::comma)
 ```
 
     
@@ -67,51 +88,70 @@ TITLE_RATINGS |>
 
 ```{r}
 TITLE_RATINGS |>
-    pull(numVotes) |>
-    quantile()
+  pull(numVotes) |>
+  quantile()
 
 TITLE_RATINGS <- TITLE_RATINGS |>
-    filter(numVotes >= 100)
-
+  filter(numVotes >= 100)
 ```
 
 
 ```{r}
 TITLE_BASICS <- TITLE_BASICS |>
-    semi_join(TITLE_RATINGS, 
-              join_by(tconst == tconst))
+  semi_join(
+    TITLE_RATINGS,
+    join_by(tconst == tconst)
+  )
 
 TITLE_CREW <- TITLE_CREW |>
-    semi_join(TITLE_RATINGS, 
-              join_by(tconst == tconst))
+  semi_join(
+    TITLE_RATINGS,
+    join_by(tconst == tconst)
+  )
 
 TITLE_EPISODES_1 <- TITLE_EPISODES |>
-    semi_join(TITLE_RATINGS, 
-              join_by(tconst == tconst))
+  semi_join(
+    TITLE_RATINGS,
+    join_by(tconst == tconst)
+  )
 TITLE_EPISODES_2 <- TITLE_EPISODES |>
-    semi_join(TITLE_RATINGS, 
-              join_by(parentTconst == tconst))
+  semi_join(
+    TITLE_RATINGS,
+    join_by(parentTconst == tconst)
+  )
 
-TITLE_EPISODES <- bind_rows(TITLE_EPISODES_1,
-                            TITLE_EPISODES_2) |>
-    distinct()
+TITLE_EPISODES <- bind_rows(
+  TITLE_EPISODES_1,
+  TITLE_EPISODES_2
+) |>
+  distinct()
 
 TITLE_PRINCIPALS <- TITLE_PRINCIPALS |>
-    semi_join(TITLE_RATINGS, join_by(tconst == tconst))
+  semi_join(TITLE_RATINGS, join_by(tconst == tconst))
 
 
 rm(TITLE_EPISODES_1)
 rm(TITLE_EPISODES_2)
 
+
+## Save as RDS so that it can be read fast later.
+# saveRDS(TITLE_PRINCIPALS, "title.principals.rds", compress = FALSE)
+# saveRDS(NAME_BASICS, "name.basics.rds", compress = FALSE)
+# saveRDS(TITLE_BASICS, "title.basics.rds", compress = FALSE)
+# saveRDS(TITLE_EPISODES, "title.episode.rds", compress = FALSE)
+# saveRDS(TITLE_RATINGS, "title.ratings.rds", compress = FALSE)
+# saveRDS(TITLE_CREW, "title.crew.rds", compress = FALSE)
+# saveRDS(TITLE_PRINCIPALS, "title.principals.rds", compress = FALSE)
 ```
 
 
 ### Data Cleaning
 ```{r}
-
 NAME_BASICS <- NAME_BASICS |>
-    mutate(birthYear = as.numeric(birthYear),
-           deathYear = as.numeric(deathYear))
+  mutate(
+    birthYear = as.numeric(birthYear),
+    deathYear = as.numeric(deathYear)
+  )
 
 glimpse(NAME_BASICS)
 ```
@@ -126,66 +166,60 @@ of `mutate` and the coercion functions `as.numeric` and `as.logical`.
 
 ```{r}
 glimpse(TITLE_BASICS)
-
-
 ```
 
 As we can see, isAdult can be boolean. Startyear, endYear, runTimeMinutes can be numbers. 
 
 ```{r}
-
-TITLE_BASICS <- TITLE_BASICS |> 
-    mutate(
-        startYear = as.numeric(startYear),
-        endYear = as.numeric(endYear),
-        runtimeMinutes = as.numeric(runtimeMinutes),
-        isAdult = as.logical(isAdult)
-    )
+TITLE_BASICS <- TITLE_BASICS |>
+  mutate(
+    startYear = as.numeric(startYear),
+    endYear = as.numeric(endYear),
+    runtimeMinutes = as.numeric(runtimeMinutes),
+    isAdult = as.logical(isAdult)
+  )
 ```
 
 ```{r}
 glimpse(TITLE_EPISODES)
 
-TITLE_EPISODES <- TITLE_EPISODES |> 
-    mutate(
-       seasonNumber  = as.numeric(seasonNumber),
-        episodeNumber = as.numeric(episodeNumber)
-     
-    )
-
+TITLE_EPISODES <- TITLE_EPISODES |>
+  mutate(
+    seasonNumber = as.numeric(seasonNumber),
+    episodeNumber = as.numeric(episodeNumber)
+  )
 ```
 
 ```{r}
 glimpse(NAME_BASICS)
 ```
 ```{r}
-NAME_BASICS |> separate_longer_delim(knownForTitles, ",") |> slice_head(n=10)
-
+NAME_BASICS |>
+  separate_longer_delim(knownForTitles, ",") |>
+  slice_head(n = 10)
 ```
 ###1. How many movies, TV series, and TV episodes are in the data set?
 
 ```{r}
 # Count movies, TV series, and TV episodes
-TITLE_BASICS |> 
-    group_by(titleType) |> 
-    summarise(count = n())
+TITLE_BASICS |>
+  group_by(titleType) |>
+  summarise(count = n())
 ```
 
 ```{r}
 # Find the oldest living person
-NAME_BASICS |> 
-    filter(is.na(deathYear)) |>  # Only living people
-    filter(!is.na(birthYear)) |>  # Exclude missing birth years
-    arrange(birthYear) |>         # Sort by birth year
-    head(1)                       # Get the oldest person
-
+NAME_BASICS |>
+  filter(is.na(deathYear)) |> # Only living people
+  filter(!is.na(birthYear)) |> # Exclude missing birth years
+  arrange(birthYear) |> # Sort by birth year
+  head(1) # Get the oldest person
 ```
 # Find the TV episode with 10/10 rating and 200,000 ratings
 ```{r}
-
-TITLE_RATINGS |> 
-    filter(averageRating == 10, numVotes >= 200000) |>
-    inner_join(TITLE_BASICS, by = "tconst")
+TITLE_RATINGS |>
+  filter(averageRating == 10, numVotes >= 200000) |>
+  inner_join(TITLE_BASICS, by = "tconst")
 
 # # Print the result
 # perfect_episode |>
@@ -193,17 +227,16 @@ TITLE_RATINGS |>
 #     options = list(pageLength = 1, dom = "t"), # Only display top row
 #     rownames = FALSE
 #   )
-# 
+#
 # # Join with TITLE_BASICS to get the title and series info
-# perfect_episode_details <- perfect_episode |> 
+# perfect_episode_details <- perfect_episode |>
 #     inner_join(TITLE_BASICS, by = "tconst")
-# 
+#
 # perfect_episode_details |>
 #   datatable(
 #     options = list(pageLength = 1, dom = "t"), # Only display top row
 #     rownames = FALSE
 #   )
-
 ```
 
 4. What four projects is the actor Mark Hamill most known for?
@@ -212,52 +245,52 @@ TITLE_RATINGS |>
 # Find Mark Hamill in the NAME_BASICS table
 
 
-mark_hamill <- NAME_BASICS |> 
-    filter(primaryName == "Mark Hamill") |> 
-    pull(knownForTitles)
+mark_hamill <- NAME_BASICS |>
+  filter(primaryName == "Mark Hamill") |>
+  pull(knownForTitles)
 
 
 tconsts <- unlist(strsplit(mark_hamill, ","))
 
 
- TITLE_BASICS |> 
-   filter(tconst %in% tconsts)
-
+TITLE_BASICS |>
+  filter(tconst %in% tconsts)
 ```
 
 
 ###  TV series with more than 12 episodes and the highest average rating
 ```{r}
 # Filter for TV episodes with ratings and join with TITLE_BASICS
-episode_ratings <- TITLE_EPISODES |> 
-    inner_join(TITLE_RATINGS, by = "tconst") |> 
-    inner_join(TITLE_BASICS, by = c("parentTconst" = "tconst"))
+episode_ratings <- TITLE_EPISODES |>
+  inner_join(TITLE_RATINGS, by = "tconst") |>
+  inner_join(TITLE_BASICS, by = c("parentTconst" = "tconst"))
 
 # Count episodes per series and filter for series with more than 12 episodes
-episode_ratings |> 
-    group_by(parentTconst, primaryTitle) |> 
-    summarise(avg_rating = mean(averageRating, na.rm = TRUE), 
-              num_episodes = n(), 
-              .groups = "drop") |> 
-    filter(num_episodes > 12) |> 
-    arrange(desc(avg_rating))|>
+episode_ratings |>
+  group_by(parentTconst, primaryTitle) |>
+  summarise(
+    avg_rating = mean(averageRating, na.rm = TRUE),
+    num_episodes = n(),
+    .groups = "drop"
+  ) |>
+  filter(num_episodes > 12) |>
+  arrange(desc(avg_rating)) |>
   head(1)
-
 ```
 ### 6. Do later seasons of Happy Days have lower average ratings than earlier seasons?
 
 ```{r}
 # Find all episodes of Happy Days
-happy_days_title  <- TITLE_BASICS |>
-    filter(primaryTitle == "Happy Days")
+happy_days <- TITLE_BASICS |>
+  filter(primaryTitle == "Happy Days")
 
-#Join with episodes and ratings
+# Join with episodes and ratings
 TITLE_EPISODES |>
-    filter(parentTconst == happy_days$tconst) |>
-    inner_join(TITLE_RATINGS, by = "tconst") |>
-    group_by(seasonNumber) |>
-    summarise(avg_rating = mean(averageRating, na.rm = TRUE)) |>
-    arrange(seasonNumber)
+  filter(parentTconst %in% happy_days$tconst) |>
+  inner_join(TITLE_RATINGS, by = "tconst") |>
+  group_by(seasonNumber) |>
+  summarise(avg_rating = mean(averageRating, na.rm = TRUE)) |>
+  arrange(seasonNumber)
 ```
 Based on the results you obtained, it does appear that later seasons of *Happy Days* generally have lower average ratings than the earlier seasons:
 
@@ -274,109 +307,105 @@ Would you like to proceed with further analysis or clarify any other part of the
 ## Task 3
 ```{r}
 # Add a custom success metric to TITLE_RATINGS
-TITLE_RATINGS <- TITLE_RATINGS |> 
-    mutate(success_metric = averageRating * log10(numVotes))
+TITLE_RATINGS <- TITLE_RATINGS |>
+  mutate(success_metric = averageRating * log10(numVotes))
 
 glimpse(TITLE_RATINGS)
-
 ```
 
 ```{r}
-movies_only <- TITLE_BASICS |> 
-    filter(titleType == "movie")
+movies_only <- TITLE_BASICS |>
+  filter(titleType == "movie")
 
 # Add a custom success metric to the movies_ratings table
-movies_ratings <- TITLE_RATINGS |> 
-    inner_join(movies_only, by = "tconst")
+movies_ratings <- TITLE_RATINGS |>
+  inner_join(movies_only, by = "tconst")
 
 
 # View the top 10 movies by success_metric
-movies_ratings |> 
-    arrange(desc(success_metric)) |> 
-    head(10) |>
+movies_ratings |>
+  arrange(desc(success_metric)) |>
+  head(10) |>
   select(primaryTitle, averageRating, numVotes, success_metric)
-
 ```
 
 
 ## Low-Scoring Popular Movies Validation
 ```{r}
 # Select 3-5 movies with a high number of votes but low success metric
-movies_ratings |> 
-    filter(numVotes > 100000) |>  # Filter for popular movies
-    arrange(success_metric) |>    # Sort by lowest success metric
-    head(5) |>
-    select(primaryTitle, averageRating, numVotes, success_metric)
-
-
+movies_ratings |>
+  filter(numVotes > 100000) |> # Filter for popular movies
+  arrange(success_metric) |> # Sort by lowest success metric
+  head(5) |>
+  select(primaryTitle, averageRating, numVotes, success_metric)
 ```
 ### 3. Prestige Actor or Director Validation
 ```{r}
 # Example for a director like Steven Spielberg
-# TITLE_CREW |> 
+# TITLE_CREW |>
 #    select(directors)
 
 # Filter for Steven Spielberg in the NAME_BASICS table
-spielberg_nconst <- NAME_BASICS |> 
-    filter(primaryName == "Steven Spielberg") |> 
-    pull(nconst)
+spielberg_nconst <- NAME_BASICS |>
+  filter(primaryName == "Steven Spielberg") |>
+  pull(nconst)
 
 # Filter TITLE_CREW for movies directed by Steven Spielberg
-spielberg_projects <- TITLE_CREW |> 
-    filter(directors == spielberg_nconst)  # Spielberg's nconst from the previous step
+spielberg_projects <- TITLE_CREW |>
+  filter(directors == spielberg_nconst) # Spielberg's nconst from the previous step
 
 # Join with TITLE_BASICS to get movie titles
-spielberg_movies <- spielberg_projects |> 
-    inner_join(movies_ratings, by = "tconst")  # Join with the ratings table to get success metric
+spielberg_movies <- spielberg_projects |>
+  inner_join(movies_ratings, by = "tconst") # Join with the ratings table to get success metric
 
 # Arrange by success metric to see top movies
-spielberg_success <- spielberg_movies |> 
-    arrange(desc(success_metric)) |> 
-    select(primaryTitle, averageRating, numVotes, success_metric)
-
-print(spielberg_success)
-
+spielberg_movies |>
+  arrange(desc(success_metric)) |>
+  select(primaryTitle, averageRating, numVotes, success_metric) |>
+  DT::datatable(options = list(pageLength = 5))
 
 
-# spielberg_success <- movies_ratings |> 
-#     filter(tconst %in% spielberg_tconst) |> 
+
+
+
+# spielberg_success <- movies_ratings |>
+#     filter(tconst %in% spielberg_tconst) |>
 #     arrange(desc(success_metric))
-# 
+#
 # print(spielberg_success)
-
 ```
 
 
 ## 4. Other Spot-Check Validation
 ```{r}
 # # Compare success scores across genres
-# genre_success <- movies_ratings |> 
-#     group_by(genre) |> 
-#     summarise(avg_success = mean(success_metric, na.rm = TRUE)) |> 
+# genre_success <- movies_ratings |>
+#     group_by(genre) |>
+#     summarise(avg_success = mean(success_metric, na.rm = TRUE)) |>
 #     arrange(desc(avg_success))
-# 
+#
 # print(genre_success)
 
 library(tidyr)
 
 # Split genres into multiple rows
-movies_with_genres <- movies_ratings |> 
-    separate_rows(genres, sep = ",")
+movies_with_genres <- movies_ratings |>
+  separate_rows(genres, sep = ",")
 
 # Calculate average success metric by genre
-movies_with_genres |> 
-    group_by(genres) |> 
-    summarise(avg_success = mean(success_metric, na.rm = TRUE), 
-              num_movies = n()) |>  # Count how many movies are in each genre
-    arrange(desc(avg_success))
-
-
+movies_with_genres |>
+  group_by(genres) |>
+  summarise(
+    avg_success = mean(success_metric, na.rm = TRUE),
+    num_movies = n()
+  ) |> # Count how many movies are in each genre
+  arrange(desc(avg_success)) |>
+  DT::datatable(options = list(pageLength = 5))
 ```
 
 ### 5. Numerical Threshold for Success
 
 ```{r}
-
 # Determine quantiles for success_metric
 quantile(movies_ratings$success_metric, probs = seq(0, 1, by = 0.05))
 ```
@@ -388,126 +417,115 @@ quantile(movies_ratings$success_metric, probs = seq(0, 1, by = 0.05))
 success_threshold <- 25.85
 
 # Filter movies that are considered "successful"
-successful_movies <- movies_ratings |> 
-    filter(success_metric >= success_threshold) |>
-  select(primaryTitle, averageRating, numVotes, success_metric)
-
-# View the successful movies
-print(successful_movies)
+movies_ratings |>
+  filter(success_metric >= success_threshold) |>
+  select(primaryTitle, averageRating, numVotes, success_metric) |>
+  head(100) |>
+  DT::datatable(options = list(pageLength = 5))
 ```
 ###Examining Success by Genre and Decade
 1. Prepare Data for Analysis
 
 ```{r}
 # Ensure that startYear is numeric
-movies_ratings <- movies_ratings |> 
-    mutate(startYear = as.numeric(startYear))
+movies_ratings <- movies_ratings |>
+  mutate(startYear = as.numeric(startYear))
 
 # Separate the genres into individual rows (some movies have multiple genres)
-movies_genre <- movies_ratings |> 
-    separate_rows(genres, sep = ",")
+movies_genre <- movies_ratings |>
+  separate_rows(genres, sep = ",")
 
 # Rename the 'genres' column to 'genre'
-movies_genre <- movies_genre |> 
-    rename(genre = genres)
-
-
+movies_genre <- movies_genre |>
+  rename(genre = genres)
 ```
 
 2. What Was the Genre with the Most “Successes” in Each Decade?
 ```{r}
 # Create a new column for the decade
-movies_genre <- movies_genre |> 
-    mutate(decade = floor(startYear / 10) * 10)
+movies_genre <- movies_genre |>
+  mutate(decade = floor(startYear / 10) * 10)
 
 # Filter for successful movies (using the threshold from earlier)
-successful_movies_by_decade <- movies_genre |> 
-    filter(success_metric >= success_threshold) |> 
-    group_by(decade, genre) |> 
-    summarise(num_successes = n(), .groups = "drop") |> 
-    arrange(decade, desc(num_successes))
+successful_movies_by_decade <- movies_genre |>
+  filter(success_metric >= success_threshold) |>
+  group_by(decade, genre) |>
+  summarise(num_successes = n(), .groups = "drop") |>
+  arrange(decade, desc(num_successes))
 
 # Find the top genre in each decade
-top_genre_by_decade <- successful_movies_by_decade |> 
-    group_by(decade) |> 
-    slice_max(order_by = num_successes, n = 1)
-
-print(top_genre_by_decade)
-
+successful_movies_by_decade |>
+  group_by(decade) |>
+  slice_max(order_by = num_successes, n = 1) |>
+  DT::datatable(options = list(pageLength = 5))
 ```
 ### 3. What Genre Consistently Has the Most “Successes”?
 ```{r}
 # Total number of successes per genre across all decades
-total_successes_by_genre <- movies_genre |> 
-    filter(success_metric >= success_threshold) |> 
-    group_by(genre) |> 
-    summarise(total_successes = n(), .groups = "drop") |> 
-    arrange(desc(total_successes))
+total_successes_by_genre <- movies_genre |>
+  filter(success_metric >= success_threshold) |>
+  group_by(genre) |>
+  summarise(total_successes = n(), .groups = "drop") |>
+  arrange(desc(total_successes))
 
-print(total_successes_by_genre)
-
+total_successes_by_genre |>
+  DT::datatable(options = list(pageLength = 5))
 ```
 ### 4. What Genre Used to Reliably Produce “Successes” but Has Fallen Out of Favor?
 ```{r}
 # Successes in earlier decades (before 2000) vs recent decades (2000 and later)
-success_by_era <- movies_genre |> 
-    mutate(era = ifelse(decade < 1980, "Before 2000", "2000 and After")) |> 
-    filter(success_metric >= success_threshold) |> 
-    group_by(era, genre) |> 
-    summarise(num_successes = n(), .groups = "drop") |> 
-    pivot_wider(names_from = era, values_from = num_successes, values_fill = 0) |> 
-    mutate(fall_out = `Before 2000` > 0 & `2000 and After` == 0) |> 
-    filter(fall_out == TRUE)
+success_by_era <- movies_genre |>
+  mutate(era = ifelse(decade < 1980, "Before 2000", "2000 and After")) |>
+  filter(success_metric >= success_threshold) |>
+  group_by(era, genre) |>
+  summarise(num_successes = n(), .groups = "drop") |>
+  pivot_wider(names_from = era, values_from = num_successes, values_fill = 0) |>
+  mutate(fall_out = `Before 2000` > 0 & `2000 and After` == 0) |>
+  filter(fall_out == TRUE)
 
-print(success_by_era)
-
-
+success_by_era |>
+  DT::datatable(options = list(pageLength = 5))
 ```
 
 ### 5. What Genre Has Produced the Most “Successes” Since 2010?
 ```{r}
 # Filter for movies since 2010 and count successes by genre
-successes_since_2010 <- movies_genre |> 
-    filter(startYear >= 2010, success_metric >= success_threshold) |> 
-    group_by(genre) |> 
-    summarise(num_successes = n(), .groups = "drop") |> 
-    arrange(desc(num_successes))
-
-print(successes_since_2010)
+movies_genre |>
+  filter(startYear >= 2010, success_metric >= success_threshold) |>
+  group_by(genre) |>
+  summarise(num_successes = n(), .groups = "drop") |>
+  arrange(desc(num_successes)) |>
+  DT::datatable(options = list(pageLength = 5))
 ```
 
 ### 6. Does the Genre with the Most Successes Have the Highest Success Rate?
 ```{r}
 # Calculate the total number of movies per genre and the number of successes
-genre_success_rate <- movies_genre |> 
-    group_by(genre) |> 
-    summarise(
-        total_movies = n(),
-        num_successes = sum(success_metric >= success_threshold),
-        success_rate = num_successes / total_movies * 100,
-        .groups = "drop"
-    ) |> 
-    arrange(desc(success_rate))
-
-print(genre_success_rate)
+movies_genre |>
+  group_by(genre) |>
+  summarise(
+    total_movies = n(),
+    num_successes = sum(success_metric >= success_threshold),
+    success_rate = num_successes / total_movies * 100,
+    .groups = "drop"
+  ) |>
+  arrange(desc(success_rate)) |>
+  DT::datatable(options = list(pageLength = 5))
 ```
 
 ### 7. What Genre Has Become More Popular in Recent Years?
 ```{r}
 # Compare genre popularity by counting the number of movies in recent years (post-2010) vs earlier
 # Ensure there are no missing startYear values and proceed with the calculation
-genre_popularity_trend <- movies_genre |> 
-    filter(!is.na(startYear)) |>  # Filter out rows with NA in startYear
-    mutate(era = ifelse(startYear >= 2010, "Post 2010", "Pre 2010")) |> 
-    group_by(era, genre) |> 
-    summarise(num_movies = n(), .groups = "drop") |> 
-    pivot_wider(names_from = era, values_from = num_movies, values_fill = 0) |> 
-    mutate(popularity_increase = `Post 2010` > `Pre 2010`) |> 
-    filter(popularity_increase == TRUE)
-
-print(genre_popularity_trend)
-
-
+movies_genre |>
+  filter(!is.na(startYear)) |> # Filter out rows with NA in startYear
+  mutate(era = ifelse(startYear >= 2010, "Post 2010", "Pre 2010")) |>
+  group_by(era, genre) |>
+  summarise(num_movies = n(), .groups = "drop") |>
+  pivot_wider(names_from = era, values_from = num_movies, values_fill = 0) |>
+  mutate(popularity_increase = `Post 2010` > `Pre 2010`) |>
+  filter(popularity_increase == TRUE) |>
+  DT::datatable(options = list(pageLength = 5))
 ```
 
 
@@ -516,24 +534,25 @@ Identify (at least) two actors and one director who you will target as the key t
 
 ```{r}
 # Join TITLE_PRINCIPALS with movies_ratings to get actors with successful movies
-successful_actors <- TITLE_PRINCIPALS |> 
-    inner_join(movies_ratings, by = "tconst") |> 
-    filter(category == "actor" | category == "actress") |> 
-    group_by(nconst) |> 
-    summarise(num_successful_movies = sum(success_metric >= success_threshold), 
-              avg_success_metric = mean(success_metric, na.rm = TRUE), 
-              .groups = "drop") |> 
-    arrange(desc(num_successful_movies)) |> 
-    head(10)
+successful_actors <- TITLE_PRINCIPALS |>
+  inner_join(movies_ratings, by = "tconst") |>
+  filter(category == "actor" | category == "actress") |>
+  group_by(nconst) |>
+  summarise(
+    num_successful_movies = sum(success_metric >= success_threshold),
+    avg_success_metric = mean(success_metric, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  arrange(desc(num_successful_movies)) |>
+  head(10)
 
 # Join with NAME_BASICS to get actor names
-successful_actors <- successful_actors |> 
-    inner_join(NAME_BASICS, by = "nconst") |> 
-    select(primaryName, num_successful_movies, avg_success_metric)
+successful_actors <- successful_actors |>
+  inner_join(NAME_BASICS, by = "nconst") |>
+  select(primaryName, num_successful_movies, avg_success_metric)
 
-print(successful_actors)
-
-
+successful_actors |>
+  DT::datatable(options = list(pageLength = 5))
 ```
 
 Directors:
@@ -541,46 +560,47 @@ Now let’s find the most successful director:
 
 ```{r}
 # Join TITLE_CREW with movies_ratings to get directors with successful movies
-successful_directors <- TITLE_CREW |> 
-    inner_join(movies_ratings, by = "tconst") |> 
-    filter(!is.na(directors)) |> 
-    separate_rows(directors, sep = ",") |> 
-    group_by(directors) |> 
-    summarise(num_successful_movies = sum(success_metric >= success_threshold), 
-              avg_success_metric = mean(success_metric, na.rm = TRUE), 
-              .groups = "drop") |> 
-    arrange(desc(num_successful_movies)) |> 
-    head(5)
+successful_directors <- TITLE_CREW |>
+  inner_join(movies_ratings, by = "tconst") |>
+  filter(!is.na(directors)) |>
+  separate_rows(directors, sep = ",") |>
+  group_by(directors) |>
+  summarise(
+    num_successful_movies = sum(success_metric >= success_threshold),
+    avg_success_metric = mean(success_metric, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  arrange(desc(num_successful_movies)) |>
+  head(5)
 
 # Join with NAME_BASICS to get director names
-successful_directors <- successful_directors |> 
-    inner_join(NAME_BASICS, by = c("directors" = "nconst")) |> 
-    select(primaryName, num_successful_movies, avg_success_metric)
+successful_directors <- successful_directors |>
+  inner_join(NAME_BASICS, by = c("directors" = "nconst")) |>
+  select(primaryName, num_successful_movies, avg_success_metric)
 
-print(successful_directors)
-
-
+successful_directors |>
+  DT::datatable(options = list(pageLength = 5))
 ```
 
 Step 2: Generate a Graphic for Actor/Director Success
 ```{r}
-
 library(ggplot2)
 
 # Combine actors and directors for visualization
 key_talent <- rbind(
-    successful_actors |> head(2), 
-    successful_directors |> head(1)
+  successful_actors |> head(2),
+  successful_directors |> head(1)
 )
 
 # Create a bar plot for key talent success
 ggplot(key_talent, aes(x = reorder(primaryName, -num_successful_movies), y = num_successful_movies)) +
-    geom_bar(stat = "identity", fill = "steelblue") +
-    labs(title = "Number of Successful Movies for Key Talent",
-         x = "Talent",
-         y = "Number of Successful Movies") +
-    theme_minimal()
-
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(
+    title = "Number of Successful Movies for Key Talent",
+    x = "Talent",
+    y = "Number of Successful Movies"
+  ) +
+  theme_minimal()
 ```
 
 ### Step 3: Create a Table for Actor/Director Success
@@ -590,20 +610,22 @@ library(knitr)
 library(kableExtra)
 
 # Add role information for actors and directors
-actors <- successful_actors |> head(2) |> mutate(role = "Actor")
-directors <- successful_directors |> head(1) |> mutate(role = "Director")
+actors <- successful_actors |>
+  head(2) |>
+  mutate(role = "Actor")
+directors <- successful_directors |>
+  head(1) |>
+  mutate(role = "Director")
 
 # Combine actors and directors into one table
 key_talent <- rbind(actors, directors)
 
 
 # Create a table showing the role, number of successful movies, and average success metric
-key_talent |> 
-    select(primaryName, role, num_successful_movies, avg_success_metric) |> 
-    kable(col.names = c("Name", "Role", "Successful Movies", "Average Success Metric")) |> 
-    kable_styling(bootstrap_options = "striped", full_width = F)
-
-
+key_talent |>
+  select(primaryName, role, num_successful_movies, avg_success_metric) |>
+  kable(col.names = c("Name", "Role", "Successful Movies", "Average Success Metric")) |>
+  kable_styling(bootstrap_options = "striped", full_width = F)
 ```
 
 ### Task 6: Finding a Classic Movie to Remake
@@ -618,54 +640,51 @@ Step 1: Filter for Classic Movies
 year_cutoff <- 1999
 
 # Filter for classic movies that haven't been remade in the last 25 years
-classic_movies <- movies_ratings |> 
-    filter(startYear < year_cutoff, 
-           averageRating >= 7.5, 
-           numVotes >= 50000) |> 
-    arrange(desc(averageRating))
+classic_movies <- movies_ratings |>
+  filter(
+    startYear < year_cutoff,
+    averageRating >= 7.5,
+    numVotes >= 50000
+  ) |>
+  arrange(desc(averageRating))
 
-# View the top candidates for a remake
-print(classic_movies |> head(10))
+classic_movies |>
+  DT::datatable(options = list(pageLength = 5))
 ```
 
 Step 2: Check if Original Actors Are Still Alive
 ```{r}
 # Get key actors from the original movie
-original_movie_tconst <- classic_movies$tconst[1]  # Example: select the first movie in the list
+original_movie_tconst <- classic_movies$tconst[1] # Example: select the first movie in the list
 
 # Find actors in the original movie
-original_actors <- TITLE_PRINCIPALS |> 
-    filter(tconst == original_movie_tconst, category %in% c("actor", "actress")) |> 
-    inner_join(NAME_BASICS, by = "nconst") |> 
-    select(primaryName, birthYear, deathYear)
+original_actors <- TITLE_PRINCIPALS |>
+  filter(tconst == original_movie_tconst, category %in% c("actor", "actress")) |>
+  inner_join(NAME_BASICS, by = "nconst") |>
+  select(primaryName, birthYear, deathYear)
 
 # Filter for actors who are still alive
-alive_actors <- original_actors |> 
-    filter(is.na(deathYear))
+alive_actors <- original_actors |>
+  filter(is.na(deathYear))
 
 print(alive_actors)
-
 ```
 Step 2: Check if Original Directors/writers Are Still Alive
 ```{r}
 # Find directors and writers from the original movie
-original_crew <- TITLE_CREW |> 
-    filter(tconst == original_movie_tconst) |> 
-    separate_rows(directors, writers, sep = ",") |> 
-    pivot_longer(c(directors, writers), names_to = "role", values_to = "nconst") |> 
-    inner_join(NAME_BASICS, by = "nconst") |> 
-    select(primaryName, role, birthYear, deathYear)
+original_crew <- TITLE_CREW |>
+  filter(tconst == original_movie_tconst) |>
+  separate_rows(directors, writers, sep = ",") |>
+  pivot_longer(c(directors, writers), names_to = "role", values_to = "nconst") |>
+  inner_join(NAME_BASICS, by = "nconst") |>
+  select(primaryName, role, birthYear, deathYear)
 
 # Filter for crew members who are still alive
-alive_crew <- original_crew |> 
-    filter(is.na(deathYear))
+alive_crew <- original_crew |>
+  filter(is.na(deathYear))
 
-print(alive_crew)
-
+alive_crew |>
+  DT::datatable(options = list(pageLength = 5))
 ```
 Step 4: Consider Including Original Talent and Legal Clearance
 
-```{r}
-
-
-```

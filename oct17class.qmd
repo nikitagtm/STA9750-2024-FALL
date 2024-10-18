@@ -1,0 +1,15 @@
+---
+title: "oct17class"
+editor: visual
+---
+
+```{r}
+library(ggplot2)
+
+# Scatter plot of price vs carat, faceted by cut
+ggplot(diamonds, aes(x = carat, y = price)) +
+  geom_point(alpha = 0.5) +  # Add transparency to handle overplotting
+  facet_wrap(~ cut) +  # Facet by cut
+  labs(title = "Price vs Carat, Faceted by Cut", x = "Carat", y = "Price") +
+  theme_minimal()
+  ````
