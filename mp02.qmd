@@ -2,12 +2,12 @@
 title: "Mini Project 02"
 editor: visual
 ---
-::: {.callout-tip}
+
 ### IMPD PROJECT
 
 ### Introduction
 
-The goal of this project is to leverage data-driven insights to identify the key characteristics of successful movies and develop a compelling proposal for a new film. By analyzing historical IMDb data on movie ratings, genres, and key personnel, we aim to guide creative decisions with statistical evidence, ultimately proposing a high-potential movie idea that aligns with current industry trends and audience preferences.please refer to: [Mini-Project #02](https://michael-weylandt.com/STA9750/miniprojects/mini02.html)
+The goal of this project is to leverage data-driven insights to identify the key characteristics of successful movies and develop a compelling proposal for a new film. By analyzing historical IMDb data on movie ratings, genres, and key personnel, we aim to guide creative decisions with statistical evidence, ultimately proposing a high-potential movie idea that aligns with current industry trends and audience preferences. please refer to: [Mini-Project #02](https://michael-weylandt.com/STA9750/miniprojects/mini02.html)
 
 ### Data Sources
 
@@ -178,7 +178,6 @@ NAME_BASICS <- NAME_BASICS |>
 # Let's view data now. 
 glimpse(NAME_BASICS)
 ```
-:::
 
 ::: {.callout-tip}
 #### Task 1: Column Type Correction
@@ -715,7 +714,7 @@ key_talent <- rbind(
 
 # Create a bar plot for key talent success
 ggplot(key_talent, aes(x = reorder(primaryName, -num_successful_movies), y = num_successful_movies)) +
-  geom_bar(stat = "identity", fill = "pink") +
+  geom_bar(stat = "identity", fill = "blue") +
   labs(
     title = "Number of Successful Movies for Key Talent",
     x = "Talent",
@@ -839,8 +838,8 @@ Why drama? In recent years, drama has consistently been the top-performing genre
 Together, this dream team is set to breathe new life into one of the greatest stories ever told, while maintaining the emotional core that made the original so beloved.
 :::
 
-::: {.callout-tip}
-#### Key Points for the movie:
+
+## Key Points for the movie:
 
 **Classic Movie:** The Shawshank Redemption is a highly rated film with over 2.9 million IMDb votes and a 9.3/10 rating, making it a prime candidate for a remake.
 
@@ -851,4 +850,4 @@ Together, this dream team is set to breathe new life into one of the greatest st
 **Market Potential:** Drama continues to dominate as the top-performing genre, with over 3,290 successful titles released since 2010, making this remake a perfect fit for current audience preferences.
 
 **Nostalgia & Fan Service:** Original actors like Morgan Freeman and Tim Robbins can make cameo appearances, blending nostalgia with a modern twist to attract loyal fans and new viewers alike.
-:::
+
