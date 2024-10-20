@@ -2,6 +2,8 @@
 title: "Mini Project 02"
 editor: visual
 ---
+::: {.callout-tip}
+### IMPD PROJECT
 
 ### Introduction
 
@@ -176,13 +178,13 @@ NAME_BASICS <- NAME_BASICS |>
 # Let's view data now. 
 glimpse(NAME_BASICS)
 ```
+:::
 
 ::: {.callout-tip}
 #### Task 1: Column Type Correction
 
 Correct the column types of the `TITLE` tables using a combination
 of `mutate` and the coercion functions `as.numeric` and `as.logical`.
-:::
 
 Now, we will examine the dataset using glimpse and clean the data by converting columns in TITLE_BASICS and TITLE_EPISODES to numeric and boolean types, and split knownForTitles in NAME_BASICS for further analysis.
 
@@ -225,10 +227,11 @@ NAME_BASICS |>
   separate_longer_delim(knownForTitles, ",") |>
   slice_head(n = 10)
 ```
+:::
 
 ::: {.callout-tip}
 #### Task 2: Instructor-Provided Questions
-:::
+
 ### 2.1. How many movies, TV series, and TV episodes are in the data set?
 We calculate the total number of movies, TV series, and TV episodes after removing records with less than 100 ratings. 
 
@@ -380,11 +383,11 @@ Based on the results, it does appear that later seasons of *Happy Days* generall
 - There is a small improvement in Seasons 9 to 11, but they remain lower compared to the earlier seasons.
 
 This **confirms that later seasons, particularly after Season 3, tend to have lower average ratings compared to the earlier ones**, supporting the hypothesis that the quality of the show may have declined in its later years
+:::
 
 ::: {.callout-tip}
 #### Task 3: Custom Success Metric
 
-:::
 ### 3.1. Choose the top 5-10 movies on your m-0[] that combines IMDb ratings with the number of votes. We define success as follows:
 
 A **success metric** is a way to measure how well something has performed, in this case, movies. For your project, we want to measure both the **quality** of a movie (how good people think it is) and its **popularity** (how many people have seen and rated it).
@@ -512,10 +515,10 @@ Since 95% of movies have less than 25.85 rating, let's consider this as a succes
 ```{r}
 success_threshold <- 25.85
 ```
+:::
 
 ::: {.callout-tip}
 #### Task 4.Using questions like the following, identify a good “genre” for your next film. You do not need to answer these questions precisely, but these are may help guide your thinking.
-:::
 
 ### Prepare Data for Analysis
 Now, lets store popular movies. First mutate startYear as numeric, after which we will create separate records for separate genre with separate_rows and rename the genres column to genre.
@@ -643,11 +646,12 @@ movies_by_era |>
 
 ```
 **News genre** seems to have the highest increase in popularity. 
+:::
 
 ::: {.callout-tip}
 #### Task 5: Key Personnel
 Identify (at least) two actors and one director who you will target as the key talent for your movie. Write a short “pitch” as to why they are likely to be successful. You should support your pitch with at least one graphic and one table.
-:::
+
 ### Actors with successful movies
 Let's list down the actors with their numbers of movies which is categorized successful.
 ```{r}
@@ -711,7 +715,7 @@ key_talent <- rbind(
 
 # Create a bar plot for key talent success
 ggplot(key_talent, aes(x = reorder(primaryName, -num_successful_movies), y = num_successful_movies)) +
-  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_bar(stat = "identity", fill = "pink") +
   labs(
     title = "Number of Successful Movies for Key Talent",
     x = "Talent",
@@ -745,11 +749,12 @@ key_talent |>
   kable(col.names = c("Name", "Role", "Successful Movies", "Average Success Metric")) |>
   kable_styling(bootstrap_options = "striped", full_width = F)
 ```
-The table below demonstrates that Samuel L. Jackson and Robert De Niro lead the way with the highest number of successful movies, while Woody Allen stands out as the top director in terms of successful films.
+The table below demonstrates that **Samuel L. Jackson** and **Robert De Niro**lead the way with the highest number of successful movies, while Woody Allen stands out as the top director in terms of successful films.
+:::
 
 ::: {.callout-tip}
 #### Task 6: Finding a Classic Movie to Remake
-:::
+
 Find a classic movie to remake with your key talent. The original should have a large number of IMDb ratings, a high average rating, and not have been remade in the past 25 years.4
 
 Once you have found your classic movie to remake, confirm whether key actors, directors, or writers from the original are still alive. If so, you need to contact your legal department to ensure they can secure the rights to the project. You may also want to include the classic actors as “fan service.”
@@ -816,10 +821,11 @@ This result says that the these top directors and writers are still alive.
 To proceed with the remake of "The Shawshank Redemption," I have confirmed that several key figures from the original are still alive. Morgan Freeman and Tim Robbins, who played iconic roles, are both alive and could potentially be included in the project for "fan service." Additionally, Frank Darabont, the original director, and Stephen King, the writer, are also still active.
 
 To move forward, we will need to contact the legal department to secure the necessary rights from Castle Rock Entertainment for the film and Stephen King’s estate for the novella adaptation. Including classic actors like Freeman and Robbins in cameo roles would not only pay tribute to the original but also help attract loyal fans while building excitement for a new generation of viewers.
+:::
 
 ::: {.callout-tip}
 #### Task 7: Elevator Pitch
-:::
+
 ### Elevator Pitch: Remake of "The Shawshank Redemption"
 
 I’ve got a proposal that’s going to excite both loyal fans and a whole new audience — a modern remake of "**The Shawshank Redemption**." This film has been a staple of cinema since 1994, ranked #1 on IMDb with a near-perfect rating of 9.3/10 and over 2.9 million votes. It’s clear: people love this story of hope, resilience, and friendship, and it’s time to bring it back with a fresh perspective.
@@ -831,17 +837,18 @@ For casting, we’re aiming high: Samuel L. Jackson as "Red." With 72 hit films 
 Why drama? In recent years, drama has consistently been the top-performing genre, producing the most successful films. From 2010 onward, it has led with over 3,290 successful titles, proving that audiences are hungry for emotionally-driven stories. With the powerhouse combination of Woody Allen, Samuel L. Jackson, and Robert De Niro, we’re confident that this remake will not only honor the original but also become a hit for modern viewers.
 
 Together, this dream team is set to breathe new life into one of the greatest stories ever told, while maintaining the emotional core that made the original so beloved.
+:::
 
 ::: {.callout-tip}
 #### Key Points for the movie:
+
+**Classic Movie:** The Shawshank Redemption is a highly rated film with over 2.9 million IMDb votes and a 9.3/10 rating, making it a prime candidate for a remake.
+
+**Star Power:** Samuel L. Jackson and Robert De Niro have over 140 successful films between them, bringing star power and acting prowess to the remake.
+
+**Director:** Woody Allen, with 48 successful films, provides the artistic vision necessary to honor the original while offering a fresh perspective.
+
+**Market Potential:* Drama continues to dominate as the top-performing genre, with over 3,290 successful titles released since 2010, making this remake a perfect fit for current audience preferences.
+
+**Nostalgia & Fan Service:** Original actors like Morgan Freeman and Tim Robbins can make cameo appearances, blending nostalgia with a modern twist to attract loyal fans and new viewers alike.
 :::
-
-*Classic Movie*: The Shawshank Redemption is a highly rated film with over 2.9 million IMDb votes and a 9.3/10 rating, making it a prime candidate for a remake.
-
-*Star Power*: Samuel L. Jackson and Robert De Niro have over 140 successful films between them, bringing star power and acting prowess to the remake.
-
-*Director*: Woody Allen, with 48 successful films, provides the artistic vision necessary to honor the original while offering a fresh perspective.
-
-*Market Potentia*l: Drama continues to dominate as the top-performing genre, with over 3,290 successful titles released since 2010, making this remake a perfect fit for current audience preferences.
-
-*Nostalgia & Fan Service:* Original actors like Morgan Freeman and Tim Robbins can make cameo appearances, blending nostalgia with a modern twist to attract loyal fans and new viewers alike.
