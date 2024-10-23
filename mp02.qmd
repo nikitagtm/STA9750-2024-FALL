@@ -13,7 +13,7 @@ The goal of this project is to leverage data-driven insights to identify the key
 
 Data from the [The IMDb non-commercial release](https://datasets.imdbws.com/) can be used for this project. Specifically, which are made freely available for non-commercial use, provide comprehensive information about films, including ratings, genres, and key personnel, allowing for analysis of historical trends and the development of a data-driven movie proposal.
 
-The IMDb dataset was initially too large,  so for this project, a pre-processed and downsized version provided by the professor on  [GitHub](https://github.com/michaelweylandt/STA9750/tree/main/miniprojects/mini02_preprocessed). This version retains the essential information but is optimized for more manageable data analysis in R, allowing us to run the necessary tasks more efficiently without overloading system resources.
+The IMDb dataset was initially too large,  so for this project, a pre-processed and downsized version provided by the professor on  [GitHub](https://github.com/michaelweylandt/STA9750/tree/main/miniprojects/mini02_preprocessed) is used. This version retains the essential information but is optimized for more manageable data analysis in R, allowing us to run the necessary tasks more efficiently without overloading system resources.
 
 ### Data Description
 The data includes comprehensive information about movies, such as ratings, genres, and key personnel. The dataset consists of multiple tables:
