@@ -14,3 +14,7 @@
 .DS_Store
 .Rhistory
 *rds
+mp03data/*.csv
+mp03data/shp_data/*
+mp03data/zip_files/*
+mp03data/*.zip
