@@ -443,7 +443,7 @@ The **create_state_shp_data** function efficiently retrieves and processes shape
 
 ### Define function to create and save a map for a specific year
 
-Now working to create a customized election map for a given year. This map visualizes each state, showing which party won the state's electoral votes, with color-coded states representing the winning party (Democrat, Republican, or Other).
+Now working to create a customized election map for a given year. This map visualizes each state, showing which party won the state's electoral votes, with color-coded states representing the winning party (Democrat, Republican, or Other). Also, specialized labeling for small northeastern states, and inset maps for Alaska and Hawai is done.
 
 ```{r warning=FALSE, Message=FALSE}
 create_election_map <- function(election_year_data, shp_data_for_year, year_num, file_name = NULL) {
@@ -566,47 +566,12 @@ knitr::include_graphics("election_map_2000.png")
 This map shows the results of the 2000 U.S. Presidential Election by state, indicating the winner in each state along with the electoral college votes (ECV) awarded Where **Red**: States won by the Republican candidate. **Blue**: States won by the Democratic candidate.
 :::
 
-::: {.callout-tip title="Task 6: **OPTIONAL FOR EXTRA CREDIT** : Advanced Chloropleth Visualization of Electoral College Results Modify your previous code to make either an animated version showing election results over time."}
 
-Now I will work to create an animated choropleth map of U.S. Electoral College results from 1976 to 2022. I Will be using the magick package for image loading.
-
-```{r warning=FALSE, message=FALSE}
-library(magick)
-
-# Define election years
-years <- seq(1976, 1978, by = 4)
-
-# Now iterate over each year and retrieve the file location
-for (year in years) {
-  shp_data_for_year <- create_state_shp_data(year)
-  election_year_data <- create_election_year_data(year)
-
-  yearly_data <- shp_data_for_year |>
-    inner_join(election_year_data, by = "state")
-
-  # print(yearly_data)
- create_election_map(election_year_data, shp_data_for_year, year)
-}
-
-# Load all PNG images and create a GIF
-images <- list.files(path = "mp03data/election_maps", pattern = "*.png", full.names = TRUE)
-
-gif <- image_read(images) # Read all images
-
-animated_gif <- image_animate(gif, fps = 1)
-
-# Save the animated GIF
-image_write(animated_gif, "election_map_animation.gif")
-knitr::include_graphics("election_map_animation.gif")
-```
-This animated choropleth map effectively visualizes shifts in Electoral College results across multiple election cycles, offering insights into changes in state-level support over time.
-
-:::
-
-::: {.callout-tip title="Task 6: Advanced Chloropleth Visualization of Electoral College Results} ### 6. Modify your previous code to make either an animated faceted version showing election results over time. You may want to set facet_wrap or facet_grid to use a single column and adjust the figure size for the best reading experience"}
+::: {.callout-tip title="Task 6: Advanced Chloropleth Visualization of Electoral College Results}
+### 6. Modify your previous code to make either an animated faceted version showing election results over time. You may want to set facet_wrap or facet_grid to use a single column and adjust the figure size for the best reading experience"}
 Here I will created an animated, faceted map to visualize U.S. presidential election results over time. I prepared the election and geographic data for each election year from 1976 to 2020, merging shapefiles of U.S. states with election results to color each state by the winning party. Using facet_wrap, I created a one-column layout to display each year individually, while transition_manual provided smooth transitions between years for animation. Finally, I saved the animation as a GIF, adjusting plot settings to produce a clean, focused view of each year’s results, effectively illustrating shifts in electoral outcomes over time.
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 
 # Define a function to generate and save an animated, faceted electoral map
 create_animated_facet_map <- function(all_year_data) {
@@ -625,7 +590,6 @@ create_animated_facet_map <- function(all_year_data) {
     scale_fill_manual(values = c("DEMOCRAT" = "blue", "REPUBLICAN" = "red", "Other" = "gray")) +
     labs(
       title = "U.S. Presidential Election Results by State",
-      subtitle = "Year: {closest_state}",
       fill = "Winning Party"
     ) +
     theme_minimal() +
@@ -651,22 +615,22 @@ create_animated_facet_map <- function(all_year_data) {
 years <- seq(1976, 2022, by = 4)
 all_year_data <- list()
 
-# for (year in years) {
-#   # Assuming create_state_shp_data and create_election_year_data functions exist as per Task 5
-#   shp_data_for_year <- create_state_shp_data(year)
-#   election_year_data <- create_election_year_data(year)
-#   
-#   # Combine shapefile data with election data
-#   yearly_data <- shp_data_for_year %>%
-#     left_join(election_year_data, by = "state") %>%
-#     mutate(year = year)  # Add year column for facetting
-# 
-#   # Append yearly data to the list for later animation
-#   all_year_data[[as.character(year)]] <- yearly_data
-# }
+for (year in years) {
+  # Assuming create_state_shp_data and create_election_year_data functions exist as per Task 5
+  shp_data_for_year <- create_state_shp_data(year)
+  election_year_data <- create_election_year_data(year)
+
+  # Combine shapefile data with election data
+  yearly_data <- shp_data_for_year %>%
+    left_join(election_year_data, by = "state") %>%
+    mutate(year = year)  # Add year column for facetting
+
+  # Append yearly data to the list for later animation
+  all_year_data[[as.character(year)]] <- yearly_data
+}
 
 # Call the animation function
-# create_animated_facet_map(all_year_data)
+create_animated_facet_map(all_year_data)
 
 # Display the animation
 knitr::include_graphics("election_results_facet_animation.gif")
@@ -676,7 +640,7 @@ knitr::include_graphics("election_results_facet_animation.gif")
 
 Result shows the animated, faceted visualization highlights the shifting political landscape of the U.S. over several decades, providing a clear view of how electoral outcomes have changed across different presidential elections.
 
-::: ::: {.callout-tip title="Task 7: Evaluating Fairness of ECV Allocation Schemes"}
+::: {.callout-tip title="Task 7: Evaluating Fairness of ECV Allocation Schemes"}
 
 ###  7.1. State-Wide Winner-Take-All
 
@@ -973,3 +937,42 @@ comparison_table |>
 ::: {.callout-tip title="Fact Check"}
 Overall, the National proportional strategy seems to be most fair. It would represent will of every American Citizen and remove unfair advantages smaller states have. Politicians would have to try to gather votes from every Citizen rather than just few swing states. Other approach I would have liked to analyze is [Ranked choice voting](https://fairvote.org/our-reforms/ranked-choice-voting/) but we do not have data to estimate how the result would have been like.
 :::
+
+::: {.callout-tip title="Extra Credit: Advanced Chloropleth Visualization of Electoral College Results Modify your previous code to make either an animated version showing election results over time."}
+I couldn't generate gif from the data at once. So instead, I created multiple images for each year and combined them to form a gif. This approach allows visualizing how electoral results have changed over time, highlighting shifts in political dominance across states, trends in voting patterns, and potential changes in electoral maps due to population changes or other factors. This GIF offers an engaging, visual summary of historical election data.
+
+```{r warning=FALSE, message=FALSE}
+library(magick)
+
+# Define election years
+years <- seq(1976, 2022, by = 4)
+
+# Now iterate over each year and retrieve the file location
+for (year in years) {
+  shp_data_for_year <- create_state_shp_data(year)
+  election_year_data <- create_election_year_data(year)
+
+  yearly_data <- shp_data_for_year |>
+    inner_join(election_year_data, by = "state")
+
+  # print(yearly_data)
+  create_election_map(election_year_data, shp_data_for_year, year)
+}
+
+# Load all PNG images and create a GIF
+images <- list.files(path = "mp03data/election_maps", pattern = "*.png", full.names = TRUE)
+
+gif <- image_read(images) # Read all images
+
+# Animate the images with desired frame rate (e.g., 1 frame per second)
+animated_gif <- image_animate(gif, fps = 1)
+
+# Save the animated GIF
+image_write(animated_gif, "election_map_animation.gif")
+knitr::include_graphics("election_map_animation.gif")
+```
+This animated election map reflects Advanced Chloropleth Visualization of Electoral College Results Modify your previous code to make either an animated version showing election results over time.
+:::
+
+### Reflecting on my experience with this project:
+As someone new to the U.S. election system and experiencing an election here for the first time, working on this project was both eye-opening and challenging. I had to research a lot to understand the Electoral College and how it shapes election results. At times, it felt overwhelming, but watching the real election while working on this helped me connect more deeply with the data. This real-time context gave me a personal perspective on the process, making the project not just an academic task but a truly insightful and memorable experience.
