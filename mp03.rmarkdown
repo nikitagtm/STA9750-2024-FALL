@@ -3,6 +3,9 @@ title: "Mini project 03"
 editor: visual
 ---
 
+
+
+
 ### TOPIC : Do Proportional Electoral College Allocations Yield a More Representative Presidency?
 
 ### Introduction
@@ -12,6 +15,9 @@ For this project I will analyze whether the U.S. Electoral College provides a fa
 ### setup libraries needed for analysis
 
 To prepare for the analysis in this project, I am setting up and loading several R libraries that are essential for data manipulation, visualization, spatial analysis, and animation. This will ensure I have the tools needed for a comprehensive analysis of electoral data and effective, dynamic visualizations.
+
+
+
 
 ```{r warning=FALSE,message=FALSE}
 # Let's Install the libraries 
@@ -41,9 +47,15 @@ library(scales)
 library(magick)
 ```
 
+
+
+
 ### Manually Download us_house_votes.csv and president.csv.
 
 Following the project instructions, I manually downloaded two key datasets from the [MIT Election Data Science Lab](https://electionlab.mit.edu/) using my web browser. The [us_house_votes.csv](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/IG0UN2) for U.S. House election votes (1976-2022) and [president.csv](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/42MVDX) for presidential votes (1976-2020). I saved these locally and loaded them into R for the analysis. I also used suppressMessages for cleaner output.
+
+
+
 
 ```{r message=FALSE,warning=FALSE}
 # Load votes data and election data
@@ -51,10 +63,16 @@ house_vote_data <- suppressMessages(read_csv("mp03data/1976-2022-house.csv"))
 presidential_election_data <- suppressMessages(read_csv("mp03data/1976-2020-president.csv"))
 ```
 
+
+
+
 ::: {.callout-tip title="Task 1: Download Congressional Shapefiles 1976-2012"}
 ### Download data from 1976-2012
 
 Now I will automate download and extraction of shapefiles that contain the boundaries of U.S. congressional districts for each election year from 1976 to 2012. The data is sourced from [Here](https://cdmaps.polisci.ucla.edu/) For instance, the 94th Congress, spanning January 14, 1975, to October 1, 1976, is labeled '094' in file names so I’ll use **sprintf** to format each Congress number as a three-digit code (e.g., '094' for the 94th Congress), applying the same approach for all election years. Additionally, I will store the file location for each year.
+
+
+
 
 ```{r warning=FALSE,message=FALSE}
 # Create a empty list - congressional_boundaries_shape_file_location_map to store, to store the mapping of each election year to the download location of its corresponding shapefile.
@@ -103,12 +121,18 @@ for (congress in 94:112) {
   get_congressional_boundaries_shape_files(congress)
 }
 ```
+
+
+
 :::
 
 ::: {.callout-tip title="Task 2: Download Congressional Shapefiles 2014-2022"}
 ### Download Congressional data from 2014-2022
 
 let's ensure that the data for congressional boundaries from 2014 to 2022 is downloaded and organized efficiently, ready for further use in analysis. Also, the name of the files [Here](https://www2.census.gov/geo/tiger/TIGER2024/) are ending with these numbers- "118", "116", "115", "114" so, I checked each version in sequence until it finds one that works for a specific year.
+
+
+
 
 ```{r}
 # This will be the template for the URL where the shapefiles are stored
@@ -158,12 +182,18 @@ for (year in 2014:2022) {
   }
 }
 ```
+
+
+
 :::
 
 ::: {.callout-tip title="Task 3: Exploration of Vote Count Data Answer the following using the vote count data files from the MIT Election Data Science Lab. You may answer each with a table or plot as you feel is appropriate."}
 ### 3.1. Which states have gained and lost the most seats in the US House of Representatives between 1976 and 2022?
 
 This identifies the states with the largest gains and losses in seats and visualizes these changes with a bar plot. Firstly, I filtered the data to include seat counts for each state in those years. I calculated the difference in seats (seat_change) for each state and identified the top 10 states with the largest gains and losses Then, I created a bar plot showing these changes, using green bars for gains and red bars for losses, with each bar labeled by the number of seats changed. Please follow the short notes with the code to understand it.
+
+
+
 
 ```{r}
 # Load the data from year 1976 to 2022- representing U.S. House elections
@@ -200,12 +230,18 @@ ggplot(top_gains_losses, aes(x = reorder(state, seat_change), y = seat_change, f
     axis.text.y = element_text(size = 10)
   )
 ```
+
+
+
 This chart shows the top 10 states with the most significant changes in U.S. House seats from 1976 to 2022.
 Texas and Florida gained the most seats (14 and 13), reflecting population growth in the South and West. In contrast, New York and Ohio lost the most seats (13 and 8), indicating population decline in the Northeast and Midwest. This shift redistributes political influence toward states with growing populations.
 
 ### 3.2. New York State has a unique “fusion” voting system where one candidate can appear on multiple “lines” on the ballot and their vote counts are totaled. For instance, in 2022, Jerrold Nadler appeared on both the Democrat and Working Families party lines for NYS’ 12th Congressional District. He received 200,890 votes total (184,872 as a Democrat and 16,018 as WFP), easily defeating Michael Zumbluskas, who received 44,173 votes across three party lines (Republican, Conservative, and Parent). Are there any elections in our data where the election would have had a different outcome if the “fusion” system was not used and candidates only received the votes their received from their “major party line” (Democrat or Republican) and not their total number of votes across all lines?
 
 let's analyze New York's U.S. House elections (1976 onward) to see if any outcomes would have differed without the "fusion" voting system. It calculates each candidate's total votes (across all party lines) and votes from only their major party line (Democrat or Republican). It then compares the actual winner (fusion votes) with a hypothetical winner (major party votes only) and displays cases where the outcome would have changed if fusion votes weren't counted.
+
+
+
 
 ```{r warning=FALSE,message=FALSE}
 library(dplyr)
@@ -239,11 +275,17 @@ candidate_votes |>
 
 ```
 
+
+
+
 "fusion_winner" is the candidate who actually won with combined votes from all party lines. "major_party_winner" is the hypothetical winner who would have won if only votes from major parties were counted.
 
 ### 3.3.Do presidential candidates tend to run ahead of or run behind congressional candidates in the same state? That is, does a Democratic candidate for president tend to get more votes in a given state than all Democratic congressional candidates in the same state? Does this trend differ over time? Does it differ across states or across parties? Are any presidents particularly more or less popular than their co-partisans?
 
 let's compare the total votes for Democratic and Republican candidates in presidential and congressional elections (U.S. House) during presidential election years (1976 to 2020) and how this trend varies over time.
+
+
+
 
 ```{r warning=FALSE, Message=FALSE}
 # Define presidential election years from 1976 to 2020 for our analysis
@@ -319,12 +361,18 @@ ggplot(votes_summary, aes(x = year, y = total_votes, color = interaction_label))
 
 ```
 
+
+
+
 Over time, total votes for both presidential and congressional races have steadily increased, reflecting higher voter turnout or population growth.
 
 :::
 
 ::: {.callout-tip title="Task 4: Automate Zip File Extraction Adapt the code after the ##- symbol above into a function read_shp_from_zip() which takes in a file name, pulls out the .shp file contained there in, and reads it into R using read_sf()."}
 The purpose of this process is to make it easier to work with shapefiles that are stored in zip files. Instead of manually unzipping the file, locating the shapefile, and loading it into R, this function does it all in one step. This approach is helpful because I will be working with geographic data from various sources.
+
+
+
 
 ```{r}
 
@@ -355,6 +403,9 @@ read_shp_from_zip <- function(zip_file) {
   return(shp_sf)
 }
 ```
+
+
+
 :::
 
 ### Custom Functions
@@ -364,6 +415,9 @@ Let's create custom functions that will be useful later for the analysis.
 ### Create function to get election year data.
 
 This function will give us all the data related to an election year. Things like total votes, electoral vote count. It will extract data for that year, focusing on the two main parties (Democratic and Republican).
+
+
+
 
 ```{r}
 # This represents which election year I wanna analyze
@@ -407,11 +461,17 @@ create_election_year_data <- function(year_to_look_for) {
 }
 ```
 
+
+
+
 This code will help to retrieve relevant information for election analysis, comparisons, or visualization.
 
 ### Function to get shp_data for a given year.
 
 This code is designed to prepare state-level shapefile data for a specified year.
+
+
+
 
 ```{r}
 # Let's create function to take an argument(year)
@@ -439,11 +499,17 @@ create_state_shp_data <- function(year) {
 
 ```
 
+
+
+
 The **create_state_shp_data** function efficiently retrieves and processes shapefile data, combining individual congressional districts into state-level geometries for a specified year. This function is useful for generating state-level spatial data for maps and analyses where district-level detail is not required, ensuring consistency in state names and valid geometry.
 
 ### Define function to create and save a map for a specific year
 
-Now working to create a customized election map for a given year. This map visualizes each state, showing which party won the state's electoral votes, with color-coded states representing the winning party (Democrat, Republican, or Other).
+Now working to create a customized election map for a given year. This map visualizes each state, showing which party won the state's electoral votes, with color-coded states representing the winning party (Democrat, Republican, or Other). Also, specialized labeling for small northeastern states, and inset maps for Alaska and Hawai is done.
+
+
+
 
 ```{r warning=FALSE, Message=FALSE}
 create_election_map <- function(election_year_data, shp_data_for_year, year_num, file_name = NULL) {
@@ -547,10 +613,16 @@ create_election_map <- function(election_year_data, shp_data_for_year, year_num,
 }
 ```
 
+
+
+
 Now it efficiently generates an electoral map for a specified year, incorporating color-coded party winners, labels for small northeastern states, and Alaska and Hawaii as inset maps. This automation produces detailed visualizations of election results, making it ideal for presentations or reports on electoral data.
 
 ::: {.callout-tip title="Task 5: Chloropleth Visualization of the 2000 Presidential Election Electoral College Results"}
 I will now generate an electoral map for the 2000 presidential election. I have also included a step-by-step explanation of what each line does:
+
+
+
 
 ```{r warning=FALSE, Message=FALSE}
 # Calls the function with 2000 as the argument to generate data for the 2000 presidential election
@@ -563,48 +635,19 @@ create_election_map(election_year_data, election_year_shp_data, 2000, "election_
 knitr::include_graphics("election_map_2000.png")
 ```
 
+
+
+
 This map shows the results of the 2000 U.S. Presidential Election by state, indicating the winner in each state along with the electoral college votes (ECV) awarded Where **Red**: States won by the Republican candidate. **Blue**: States won by the Democratic candidate.
 :::
 
-::: {.callout-tip title="Task 6: **OPTIONAL FOR EXTRA CREDIT** : Advanced Chloropleth Visualization of Electoral College Results Modify your previous code to make either an animated version showing election results over time."}
 
-Now I will work to create an animated choropleth map of U.S. Electoral College results from 1976 to 2022. I Will be using the magick package for image loading.
-
-```{r warning=FALSE, message=FALSE}
-library(magick)
-
-# Define election years
-years <- seq(1976, 1978, by = 4)
-
-# Now iterate over each year and retrieve the file location
-for (year in years) {
-  shp_data_for_year <- create_state_shp_data(year)
-  election_year_data <- create_election_year_data(year)
-
-  yearly_data <- shp_data_for_year |>
-    inner_join(election_year_data, by = "state")
-
-  # print(yearly_data)
- create_election_map(election_year_data, shp_data_for_year, year)
-}
-
-# Load all PNG images and create a GIF
-images <- list.files(path = "mp03data/election_maps", pattern = "*.png", full.names = TRUE)
-
-gif <- image_read(images) # Read all images
-
-animated_gif <- image_animate(gif, fps = 1)
-
-# Save the animated GIF
-image_write(animated_gif, "election_map_animation.gif")
-knitr::include_graphics("election_map_animation.gif")
-```
-This animated choropleth map effectively visualizes shifts in Electoral College results across multiple election cycles, offering insights into changes in state-level support over time.
-
-:::
-
-::: {.callout-tip title="Task 6: Advanced Chloropleth Visualization of Electoral College Results} ### 6. Modify your previous code to make either an animated faceted version showing election results over time. You may want to set facet_wrap or facet_grid to use a single column and adjust the figure size for the best reading experience"}
+::: {.callout-tip title="Task 6: Advanced Chloropleth Visualization of Electoral College Results}
+### 6. Modify your previous code to make either an animated faceted version showing election results over time. You may want to set facet_wrap or facet_grid to use a single column and adjust the figure size for the best reading experience"}
 Here I will created an animated, faceted map to visualize U.S. presidential election results over time. I prepared the election and geographic data for each election year from 1976 to 2020, merging shapefiles of U.S. states with election results to color each state by the winning party. Using facet_wrap, I created a one-column layout to display each year individually, while transition_manual provided smooth transitions between years for animation. Finally, I saved the animation as a GIF, adjusting plot settings to produce a clean, focused view of each year’s results, effectively illustrating shifts in electoral outcomes over time.
+
+
+
 
 ```{r}
 
@@ -648,25 +691,25 @@ create_animated_facet_map <- function(all_year_data) {
 }
 
 # Loop to prepare the data for each year and call the function to animate
-years <- seq(1976, 2022, by = 4)
+years <- seq(1976, 1977, by = 4)
 all_year_data <- list()
 
-# for (year in years) {
-#   # Assuming create_state_shp_data and create_election_year_data functions exist as per Task 5
-#   shp_data_for_year <- create_state_shp_data(year)
-#   election_year_data <- create_election_year_data(year)
-#   
-#   # Combine shapefile data with election data
-#   yearly_data <- shp_data_for_year %>%
-#     left_join(election_year_data, by = "state") %>%
-#     mutate(year = year)  # Add year column for facetting
-# 
-#   # Append yearly data to the list for later animation
-#   all_year_data[[as.character(year)]] <- yearly_data
-# }
+for (year in years) {
+  # Assuming create_state_shp_data and create_election_year_data functions exist as per Task 5
+  shp_data_for_year <- create_state_shp_data(year)
+  election_year_data <- create_election_year_data(year)
+
+  # Combine shapefile data with election data
+  yearly_data <- shp_data_for_year %>%
+    left_join(election_year_data, by = "state") %>%
+    mutate(year = year)  # Add year column for facetting
+
+  # Append yearly data to the list for later animation
+  all_year_data[[as.character(year)]] <- yearly_data
+}
 
 # Call the animation function
-# create_animated_facet_map(all_year_data)
+create_animated_facet_map(all_year_data)
 
 # Display the animation
 knitr::include_graphics("election_results_facet_animation.gif")
@@ -674,13 +717,19 @@ knitr::include_graphics("election_results_facet_animation.gif")
 
 ```
 
+
+
+
 Result shows the animated, faceted visualization highlights the shifting political landscape of the U.S. over several decades, providing a clear view of how electoral outcomes have changed across different presidential elections.
 
-::: ::: {.callout-tip title="Task 7: Evaluating Fairness of ECV Allocation Schemes"}
+::: {.callout-tip title="Task 7: Evaluating Fairness of ECV Allocation Schemes"}
 
 ###  7.1. State-Wide Winner-Take-All
 
 Let's calculate State-Wide Winner-Take-All to examine which party receives all of a state’s ECVs based on a simple majority, we can understand potential biases in the current system and assess its representativeness.
+
+
+
 
 ```{r}
 # Filter house_vote_data to only include presidential election years (every 4 years)
@@ -724,11 +773,17 @@ winner_take_all_summary |>
   DT::datatable()
 ```
 
+
+
+
 The table displayed here shows the results of the State-Wide Winner-Take-All allocation system for each U.S. presidential election year. The fluctuations in total ECVs show the changing dominance of parties over time and how closely contested certain election years were.
 
 ### 7.2. District-Wide Winner-Take-All + State-Wide “At Large” Votes
 
 let's calculate District-Wide Winner-Take-All + State-Wide “At Large” Votes. This will help to evaluate how district-level and at-large ECV allocations could impact the distribution of ECVs in U.S. presidential elections compared to a purely winner-take-all state system.
+
+
+
 
 ```{r}
 # 1. Calculate District-Level ECV Allocation for Each State (excluding DC since it has no districts)
@@ -772,9 +827,15 @@ district_allocation_summary |>
   DT::datatable()
 ```
 
+
+
+
 ### 7.3. State-Wide Proportional Allocation
 
 This code calculates Electoral College Votes (ECV) using a State-Wide Proportional Allocation. We first determine each party's vote share within each state, then allocate ECVs proportionally. Afterward, we adjust for any rounding differences to ensure each state’s total ECV is correct. Finally, we summarize the results nationally to compare total ECVs for each party in each election year, offering a fairer reflection of each party's support within states.
+
+
+
 
 ```{r warning=FALSE,message=FALSE}
 # Join proportional_state with ecv_data to get total ECVs for each state-year combination
@@ -812,11 +873,17 @@ proportional_state_summary |>
   DT::datatable()
 ```
 
+
+
+
 The State-Wide Proportional Allocation method more accurately reflects voter support by allocating Electoral College Votes based on each party's share of votes within each state.
 
 ### 7.4. National Proportional
 
 This code allocates Electoral College Votes (ECVs) based on each party’s national vote share. It calculates the total votes per party each year, determines each party's share of the national vote, and then allocates ECVs proportionally.
+
+
+
 
 ```{r}
 # Total ECVs for the nation
@@ -859,11 +926,17 @@ national_proportional_summary |>
   DT::datatable()
 ```
 
+
+
+
 The result is a table showing ECV distribution by party and year under a proportional system, aiming to reflect popular support more accurately.
 
 ### Based on these allocation strategies, compare the winning presidential candidate with the actual historical winner.
 
 let's identify the historical Electoral College winner for each U.S. presidential election year based on actual state-wide, winner-take-all allocations.
+
+
+
 
 ```{r}
 state_wide_winners <- presidential_election_data |>
@@ -890,11 +963,17 @@ historical_winner |>
   DT::datatable()
 ```
 
+
+
+
 This output table shows the actual winning party and ECV total per election year, reflecting the historical outcomes in the Electoral College system.
 
 ### Consolidate Results from All Allocation Strategies
 
 Now,let's evaluate the consistency of various Electoral College allocation strategies by comparing the winning party in each strategy with the historical winner.
+
+
+
 
 ```{r}
 # Combine all strategies into a single dataset and find the winner for each
@@ -929,11 +1008,17 @@ summary_results |>
   DT::datatable()
 ```
 
+
+
+
 The table shows that the State-Wide Winner-Take-All strategy matches historical results exactly with 12 matches and no differences. In contrast, the District-Wide Winner-Take-All + At-Large, National Proportional, and State-Wide Proportional strategies each show 10 matches and 2 differences, indicating that these alternative methods could have changed the election outcome in 2 instances.
 
 ### Create a comparison table that shows the winner for each strategy and the actual historical winner
 
 This code creates a comparison table that shows the actual historical election winner alongside the winners predicted by each voting strategy (Winner-Take-All, District-Wide + At-Large, State-Wide Proportional, and National Proportional) for each year. It reshapes the data, joins it with historical results, renames columns for clarity, and displays it as an interactive table, allowing easy side-by-side comparison of each strategy’s outcomes against actual results.
+
+
+
 
 ```{r}
 
@@ -968,8 +1053,15 @@ comparison_table <- historical_winner |>
 comparison_table |>
   DT::datatable()
 ```
+
+
+
 :::
 
 ::: {.callout-tip title="Fact Check"}
 Overall, the National proportional strategy seems to be most fair. It would represent will of every American Citizen and remove unfair advantages smaller states have. Politicians would have to try to gather votes from every Citizen rather than just few swing states. Other approach I would have liked to analyze is [Ranked choice voting](https://fairvote.org/our-reforms/ranked-choice-voting/) but we do not have data to estimate how the result would have been like.
+
+### Reflecting on my experience with this project:
+As someone new to the U.S. election system and experiencing an election here for the first time, working on this project was both eye-opening and challenging. I had to research a lot to understand the Electoral College and how it shapes election results. At times, it felt overwhelming, but watching the real election while working on this helped me connect more deeply with the data. This real-time context gave me a personal perspective on the process, making the project not just an academic task but a truly insightful and memorable experience.
 :::
+
