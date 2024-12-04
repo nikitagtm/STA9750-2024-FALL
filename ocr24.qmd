@@ -1,0 +1,15 @@
+---
+title: "oct24"
+editor: visual
+---
+
+
+```{r}
+library(sf)
+```
+
+
+```
+```{r}
+
+

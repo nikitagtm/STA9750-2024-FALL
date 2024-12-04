@@ -19,6 +19,12 @@ website:
             href: mp01.qmd
           - text: "Mini Project 02"
             href: mp02.qmd
+          - text: "Mini Project 03"
+            href: mp03.qmd
+          - text: "Mini Project 04"
+            href: mp04.qmd  
+            
+            
 format:
   html:
     theme: Cosmo
