@@ -1319,7 +1319,7 @@ ggplot(orp_simulation, aes(x = Month, y = ORP_Balance)) +
 The chart illustrates the ORP (Optional Retirement Plan) fund balance over the retirement period. It shows an initial growth phase as the fund benefits from portfolio returns exceeding withdrawals, followed by a plateau and eventual decline as withdrawals increase with inflation, outpacing returns. This highlights the importance of effective portfolio management to sustain fund longevity.
 
 
-### Does the Employee Run Out of Funds Before Death (ORP Only)?
+### 6.1  Whether the employee runs out of funds before death and/or has funds to leave to heirs (ORP only)
 Objective: Check if the ORP fund balance (ORP_Balance) becomes zero before the retirement period ends (death age).
 
 ***Steps:***
@@ -1337,14 +1337,14 @@ if (last_balance > 0) {
 ```
 The analysis reveals that the ORP fund remains solvent throughout the retirement period, ending with a positive balance of $101,875.34
 
-### Average Monthly Income (TRS vs ORP)
+### 6.2 Average Monthly Income (TRS vs ORP)
+
 Objective: Calculate the average monthly income for both plans during the retirement period.
 
 ***Steps:***
 
 Compute the average of the Monthly_Income column in the trs_simulation and orp_simulation dataframes.
-Also, 
-Compare the averages.
+Also,Compare the averages.
 
 
 ```{r}
@@ -1356,7 +1356,7 @@ message("Average ORP Income: ", round(avg_orp_income, 2))
 ```
 The ORP offers a higher average monthly income ($344.25) compared to TRS ($271.13), highlighting its potential to provide better financial support during retirement. However, the choice between the two plans should consider individual risk tolerance and the importance of guaranteed income.
 
-### Maximum and Minimum Gap in Monthly Income Between TRS and ORP
+### 6.3 Maximum and Minimum Gap in Monthly Income Between TRS and ORP
 Objective: Identify the largest and smallest differences in monthly income between the two plans.
 
 
@@ -1589,10 +1589,8 @@ ggplot(orp_simulation, aes(x = Month)) +
 
 The ORP Fund simulation illustrates steady monthly income growth over retirement, reflecting inflation adjustments and portfolio returns, ensuring sustainability and rising purchasing power over time.
 
-### Analyze the Probability of ORP Exhaustion
-One of the key questions is whether the ORP balance runs out before the employee passes away.We can check for each simulation if the ORP balance reaches zero before the employee’s death age (age 85).
-This will allow us to calculate the probability that the ORP account is exhausted before death.
-Code for ORP Exhaustion Probability:
+### 7.1 What is the probability that an ORP employee exhausts their savings before death?
+To determine the probability of ORP exhaustion before death, we checked each simulation for a balance reaching zero before age 85. One of the key questions is whether the ORP balance runs out before the employee passes away. This will allow us to calculate the probability that the ORP account is exhausted before death.
 
 ```{r}
 # Calculate the probability of ORP exhaustion before death
@@ -1613,10 +1611,13 @@ message("Probability of ORP Exhaustion before Death: ", round(prob_orp_exhaustio
 ```
 The simulation reveals a 75% probability of ORP fund exhaustion before death, emphasizing the need for cautious withdrawal strategies or adjustments to portfolio allocations to ensure financial stability throughout retirement.
 
-###  Compare Monthly Income Between TRS and ORP
+###  7.2 What is the probability that an ORP employee has a higher monthly income in retirement than a TRS employee?
+
+To determine if ORP provides higher monthly income than TRS, I compared inflation-adjusted payouts through simulations. I calculated average incomes and analyzed the maximum and minimum monthly income gaps to quantify ORP's advantage while considering its variability and risks.
+
+### Compare Monthly Income Between TRS and ORP***
 Next, we will compare the monthly income between the TRS and ORP plans. We will calculate the average monthly income from the TRS simulation and ORP simulation and compare them.
 
-Code for Comparing Average Monthly Income:
 ```{r}
 # Calculate average monthly income for TRS
 avg_trs_income <- mean(trs_simulation$Inflation_Adjusted_Payout, na.rm = TRUE)
@@ -1628,7 +1629,7 @@ avg_orp_income <- mean(orp_simulation$Inflation_Adjusted_Withdrawal, na.rm = TRU
 message("Average TRS Income: ", round(avg_trs_income, 2))
 message("Average ORP Income: ", round(avg_orp_income, 2))
 ```
-The calculation of the average monthly income for both TRS and ORP yielded an average of 271.13 for TRS and 344.25 for ORP. These results highlight that ORP provides a higher average income compared to TRS, which may be important when considering retirement planning and financial security in later years.
+Based on the simulations, the average monthly income for ORP was calculated as $344.25, significantly higher than TRS, which averaged $271.13. This consistent difference across the bootstrap samples demonstrates that ORP provides a higher monthly income compared to TRS in most scenarios. The work concludes that ORP has a higher probability of offering greater monthly income in retirement than TRS, reflecting its growth potential due to market investments. However, this higher income comes with variability and risks, whereas TRS offers more stability and predictability.
 
 ###  Investigate the Gap Between TRS and ORP Monthly Income
 Next, we can investigate the maximum and minimum gap between the monthly income for TRS and ORP over the simulation period. We can calculate the difference in monthly income for each month and then find the maximum and minimum gaps.
@@ -1647,9 +1648,11 @@ message("Maximum Monthly Income Gap (TRS - ORP): ", round(max_gap, 2))
 message("Minimum Monthly Income Gap (TRS - ORP): ", round(min_gap, 2))
 ```
 
-The analysis reveals that the ORP consistently provides a higher monthly income than the TRS, with a maximum gap of -56.83 and a minimum gap of -92.24, indicating a more substantial income from the ORP throughout retirement
+This part also supports the conclusion that ORP generally provides higher monthly income than TRS. By calculating the gap between TRS and ORP monthly incomes, the results indicate that the maximum monthly income gap (TRS - ORP) is -56.83 and the minimum monthly income gap (TRS - ORP) is -92.24. The negative values highlight that ORP consistently outperforms TRS in terms of monthly income across the simulation period.
 
-###  Evaluate the 4% Withdrawal Rate
+This further strengthens the conclusion that ORP has a higher probability of delivering greater monthly income compared to TRS, although it comes with more variability and potential risks. These calculations align with the earlier finding about average monthly incomes, reinforcing ORP’s advantage in income generation for retirees.
+
+###  7.3 Is the 4% withdrawal rate actually a good idea or would you recommend a different withdrawal rate?
 Now, we can examine the 4% withdrawal rate for the ORP simulation and see how it affects the ORP balance over time. We can run a sensitivity analysis to check if a different withdrawal rate (e.g., 3.5% or 5%) would make a significant difference in the long-term sustainability of the ORP balance.
 
 Code for Sensitivity Analysis:
