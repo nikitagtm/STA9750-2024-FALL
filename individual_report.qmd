@@ -1,0 +1,643 @@
+---
+title: "Personal MTA performance Analysis Report"
+editor: visual
+format:
+  html: 
+    code-fold: true
+
+---
+
+### Individual Report:Trend Analysis of Terminal On-Time Performance (2020–2024)
+
+### Introduction:
+
+This report is part of the group project titled: ***How have delays, on-time performance, and safety incidents influenced the efficiency of subway lines across NYC boroughs from 2020 to 2024?***. My specific contribution focuses on analyzing the trend in terminal on-time performance from 2020 to 2024 and comparing the performance between the COVID period (2020–2021) and post-COVID recovery (2022–2024). We can refer to [Group 2 Project](https://electionlab.mit.edu/) using our web browser for the whole report.
+
+### Conclusion of the Report:
+
+The analysis of NYC subway terminal on-time performance trends from 2020 to 2024 reveals significant insights into the operational efficiency and resilience of the system. During the COVID period (2020–2021), on-time performance was relatively high due to reduced ridership and modified schedules, with lines such as GS, S 42nd, and FS demonstrating exceptional reliability. These lines consistently maintained an average on-time performance of over 99%, setting benchmarks for operational excellence.
+
+In contrast, the post-COVID recovery period (2022–2024) saw a slight dip in performance as the system adjusted to increasing ridership and operational challenges. However, key lines like GS, FS, and H continued to excel, showcasing the system's capacity for adaptation.
+
+Seasonal and monthly trends highlight a steady recovery trajectory with distinct variations based on operational adjustments during different seasons. The Fall and Spring months exhibited the most consistent improvements, emphasizing the subway system's gradual stabilization.
+
+### Data sources:
+
+I used the [MTA Terminal On-Time Performance Dataset from 2020 to 2024](https://data.ny.gov/Transportation/MTA-Subway-Terminal-On-Time-Performance-Beginning-/vtvh-gimj/data_preview).
+
+## setup libraries needed for analysis
+
+I leveraged several powerful libraries to streamline the process.It allowed me to efficiently manipulate and clean the dataset, calculate trends, and generate high-quality visualizations to uncover insights.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+
+if(!require("tidyverse")) install.packages("tidyverse")
+if (!require("lubridate")) install.packages("lubridate")
+if (!require("DT")) install.packages("DT")
+```
+
+```{r warning=FALSE,message=FALSE}
+library(tidyverse)
+library(readxl)
+library(readr)
+library(lubridate)
+library(DT)
+library(httr)
+library(readr)
+library(ggplot2)
+library(DT)
+```
+
+### Load data
+
+I am loading the data which is sourced from the [MTA Open Data platform](data.ny.gov). I am assigning the variable **url** to link to dataset. Following that I will be viewing the first few rows of the dataset to get a quick overview of its structure and contents for a better understanding. Also, I am using the glimpse() function from the dplyr package in R. This function provides a quick overview of the structure of the mta_data dataset.
+
+```{r}
+url <- "https://data.ny.gov/api/views/vtvh-gimj/rows.csv?accessType=DOWNLOAD"
+
+
+mta_data <- read.csv(url)
+
+# View the first few rows
+DT::datatable(mta_data)
+```
+
+### Data Cleaning:
+
+I will be dropping rows with missing values eliminates the risk of errors in calculations, statistical models, or visualizations later in the analysis annd verify the cleaning process.
+
+```{r warning=FALSE,message=FALSE}
+# Drop rows with missing values in all columns
+mta_data <- mta_data |> 
+  drop_na()
+
+
+# Clean the data
+mta_data <- mta_data |>
+  mutate(month = as.Date(month, format = "%Y-%m-%d")) |>
+  drop_na(terminal_on_time_performance) |>
+  filter(year(month) >= 2020 & year(month) <= 2024)
+```
+
+::: {.callout-tip title="Data Analysis: What is the trend in terminal on-time performance from 2020–2024?"} \### 1.Which subway lines maintain the highest schedule? To identify the subway lines that consistently perform well in maintaining their schedules, I calculated the average terminal on-time performance for each line using the terminal_on_time_performance metric.
+
+```{r}
+# Calculate the average terminal on-time performance for each line
+top_lines <- mta_data |>
+  group_by(line)|>
+  summarize(avg_on_time_performance = mean(terminal_on_time_performance, na.rm = TRUE)) |>
+  arrange(desc(avg_on_time_performance))
+
+# View the top lines with the highest average on-time performance
+ DT::datatable(top_lines)
+```
+
+Lines such as GS, S 42nd, and FS serve as benchmarks for operational efficiency and customer satisfaction.
+
+### 
+
+```{r}
+# Calculate monthly average on-time performance
+monthly_performance <- mta_data |>
+  group_by(month) |>
+  summarize(avg_performance = mean(terminal_on_time_performance, na.rm = TRUE))
+
+# Identify the most and least on-time months
+most_on_time <- monthly_performance[which.max(monthly_performance$avg_performance), ]
+least_on_time <- monthly_performance[which.min(monthly_performance$avg_performance), ]
+
+# Plot the monthly performance with highlights
+ggplot(monthly_performance, aes(x = month, y = avg_performance)) +
+  geom_line(color = "blue", size = 1) +
+  geom_point(data = most_on_time, aes(x = month, y = avg_performance), color = "green", size = 2) +
+  geom_point(data = least_on_time, aes(x = month, y = avg_performance), color = "red", size = 3) +
+  geom_text(aes(x = most_on_time$month, y = most_on_time$avg_performance, 
+                label = paste0("Most On-Time: ", round(most_on_time$avg_performance, 2), "%")), 
+            vjust = 1, color = "green") +
+  geom_text(aes(x = least_on_time$month, y = least_on_time$avg_performance, 
+                label = paste0("Least On-Time: ", round(least_on_time$avg_performance, 2), "%")), 
+            vjust = 1, color = "red") +
+  labs(
+    title = "Monthly Terminal On-Time Performance (2020-2024)",
+    x = "Month",
+    y = "Average On-Time Performance (%)"
+  ) +
+  theme_minimal()
+
+```
+
+### Categorize data for COVID and Post-COVID and visualize
+
+```{r}
+# Clean and process the data
+mta_data <- mta_data |>
+  mutate(
+    month = as.Date(month, format = "%Y-%m-%d"),  # Convert 'month' to Date format
+    day_type = as.factor(day_type),              # Convert 'day_type' to a factor (1=Weekdays, 2=Weekends)
+    period = case_when(                          # Create a 'period' column
+      year(month) %in% c(2020, 2021) ~ "COVID (2020-2021)",
+      year(month) %in% c(2022, 2023, 2024) ~ "Post-COVID (2022-2024)"
+    )
+  ) |>
+  filter(!is.na(terminal_on_time_performance))   # Remove rows with missing performance data
+
+# Add Peak vs. Off-Peak labeling
+mta_data <- mta_data |>
+  mutate(peak_offpeak = case_when(
+    day_type == 1 ~ "Peak (Weekdays)",
+    day_type == 2 ~ "Off-Peak (Weekends)"
+  ))
+
+# Group by COVID/Post-COVID and Peak/Off-Peak
+performance_covid_peak <- mta_data |>
+  group_by(period, peak_offpeak) |>
+  summarize(
+    avg_performance = mean(terminal_on_time_performance, na.rm = TRUE),
+    min_performance = min(terminal_on_time_performance, na.rm = TRUE),
+    max_performance = max(terminal_on_time_performance, na.rm = TRUE)
+  )
+
+
+# Plot Peak vs Off-Peak comparison for COVID and Post-COVID periods
+ggplot(performance_covid_peak, aes(x = peak_offpeak, y = avg_performance, fill = period)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  labs(
+    title = "Terminal On-Time Performance: Peak vs Off-Peak (COVID vs Post-COVID)",
+    x = "Time Period",
+    y = "Average On-Time Performance (%)",
+    fill = "Period"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+```
+
+### Visualize Performance by Period
+
+```{r}
+# Group by Period and Month
+performance_by_period <- mta_data |>
+  group_by(period, month) |>
+  summarize(
+    avg_performance = mean(terminal_on_time_performance, na.rm = TRUE)
+  )
+
+# Plot the Comparison Graph
+ggplot(performance_by_period, aes(x = month, y = avg_performance, color = period, group = period)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Comparison of Terminal On-Time Performance (COVID vs Post-COVID)",
+    x = "Month",
+    y = "Average On-Time Performance (%)",
+    color = "Period"
+  ) +
+  theme_minimal() +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "6 months") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+### Comparison of Terminal On-Time Performance (COVID vs Post-COVID)
+
+```{r}
+# Separate plots using facet_wrap
+ggplot(performance_by_period, aes(x = month, y = avg_performance)) +
+  geom_line(color = "blue", size = 1) +
+  geom_point(size = 2, color = "red") +
+  facet_wrap(~ period, ncol = 1, scales = "free_y") +  # Create separate plots for each period
+  labs(
+    title = "Comparison of Terminal On-Time Performance (COVID vs Post-COVID)",
+    x = "Month",
+    y = "Average On-Time Performance (%)"
+  ) +
+  theme_minimal() +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "6 months") +
+  theme(
+    strip.text = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+```
+
+### Terminal On-Time Performance During COVID and post-COVID
+
+```{r}
+
+# Set up the plotting area to create two plots side by side
+par(mfrow = c(2, 1))  # Create a 2-row, 1-column layout
+
+# Plot 1: COVID Period
+with(performance_by_period %>% filter(period == "COVID (2020-2021)"), {
+  plot(
+    month, avg_performance, type = "b", col = "blue", pch = 16, lwd = 2,
+    xlab = "Month", ylab = "On-Time Performance (%)",
+    main = "Terminal On-Time Performance During COVID (2020-2021)",
+    xaxt = "n"
+  )
+  axis(1, at = month, labels = format(month, "%b %Y"), las = 2)
+})
+
+# Plot 2: Post-COVID Period
+with(performance_by_period %>% filter(period == "Post-COVID (2022-2024)"), {
+  plot(
+    month, avg_performance, type = "b", col = "green", pch = 16, lwd = 2,
+    xlab = "Month", ylab = "On-Time Performance (%)",
+    main = "Terminal On-Time Performance Post-COVID (2022-2024)",
+    xaxt = "n"
+  )
+  axis(1, at = month, labels = format(month, "%b %Y"), las = 2)
+})
+
+# Reset plotting area
+par(mfrow = c(1, 1))
+```
+
+### Terminal On-Time Performance: COVID vs Post-COVID
+
+```{r}
+# Calculate average, min, and max performance, and identify specific months
+performance_summary <- mta_data |>
+  group_by(period) |>
+  summarize(
+    avg_performance = mean(terminal_on_time_performance, na.rm = TRUE),
+    avg_month = month[which.min(abs(terminal_on_time_performance - mean(terminal_on_time_performance, na.rm = TRUE)))],  # Closest to avg
+    min_performance = min(terminal_on_time_performance, na.rm = TRUE),
+    min_month = month[which.min(terminal_on_time_performance)],  # Month for min
+    max_performance = max(terminal_on_time_performance, na.rm = TRUE),
+    max_month = month[which.max(terminal_on_time_performance)]   # Month for max
+  )
+
+# Reshape the data for plotting
+performance_summary_long <- performance_summary |>
+  pivot_longer(cols = c(avg_performance, min_performance, max_performance),
+               names_to = "Metric",
+               values_to = "Performance")
+
+# Add time labels and format them
+performance_summary_long <- performance_summary_long |>
+  mutate(
+    Time = case_when(
+      Metric == "min_performance" ~ format(min_month, "%b %Y"),
+      Metric == "max_performance" ~ format(max_month, "%b %Y"),
+      Metric == "avg_performance" ~ format(avg_month, "%b %Y")
+    )
+  )
+
+# Plot with adjustments for cropped labels
+ggplot(performance_summary_long, aes(x = Performance, y = Metric, fill = period)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.4) +  # Reduce bar width
+  geom_text(aes(label = Time), position = position_dodge(width = 0.4), hjust = -0.3, size = 4) +  # Adjust hjust for better alignment
+  labs(
+    title = "Terminal On-Time Performance: COVID vs Post-COVID",
+    x = "Percentage (%)",
+    y = "Performance Metric",
+    fill = "Period"
+  ) +
+  theme_minimal(base_size = 12) +  # Reduce the base font size
+  theme(
+    axis.text.x = element_text(size = 8),  # Smaller x-axis text
+    axis.text.y = element_text(size = 8),  # Smaller y-axis text
+    plot.title = element_text(hjust = 0.5, size = 10, face = "bold"),  # Smaller title
+    legend.position = c(0.85, 0.85),  # Keep the legend in the top-right corner
+    legend.title = element_text(size = 10),  # Keep legend title size small
+    legend.text = element_text(size = 8),  # Smaller legend text
+    plot.margin = margin(8, 18, 8, 8)  # Increase right margin for text
+  ) +
+  scale_fill_manual(values = c("COVID (2020-2021)" = "blue", "Post-COVID (2022-2024)" = "red")) +
+  coord_cartesian(clip = "off", xlim = c(0, 1.10))  # Extend x-axis to prevent cropping
+
+
+```
+
+### Yearly Trends in Terminal On-Time Performance (2020-2024)
+
+```{r}
+
+# Bar chart for COVID vs Post-COVID comparison
+ggplot(performance_by_period, aes(x = period, y = avg_performance, fill = period)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Terminal On-Time Performance: COVID vs Post-COVID",
+    x = "Period",
+    y = "Average On-Time Performance (%)"
+  ) +
+  theme_minimal()
+
+
+
+```
+
+### How does the terminal on-time performance vary across different subway lines from 2020 to 2024?
+
+To identify the subway lines that consistently maintain the highest terminal on-time performance from 2020 to 2024, This approach provides a clear, data-driven way to identify the subway lines that performed the best during the COVID period (2020–2022) and early post-COVID recovery (2023-2024).
+
+```{r}
+# Step 1: Convert 'month' column to Date format
+mta_data$month <- as.Date(mta_data$month, format = "%Y-%m-%d")
+
+# Step 2: Filter data for the period 2020 to 2022
+mta_data_filtered <- mta_data |>
+  filter(month >= as.Date("2020-01-01") & month <= as.Date("2022-12-31"))
+
+# Step 3: Calculate the average terminal on-time performance for each line
+top_lines <- mta_data_filtered |>
+  group_by(line) |>
+  summarize(avg_on_time_performance = mean(terminal_on_time_performance, na.rm = TRUE)) |>
+  arrange(desc(avg_on_time_performance))
+
+# Step 4: Select the top 10 lines with the highest average on-time performance
+top_10_lines <- top_lines |> 
+  slice_head(n = 10)
+
+# Step 5: Plot the top 10 lines using a bar chart in descending order
+ggplot(top_10_lines, aes(x = reorder(line, -avg_on_time_performance), y = avg_on_time_performance, fill = line)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Top 10 Lines by Average On-Time Performance COVID period (2020–2022)",
+    x = "Subway Line",
+    y = "Average On-Time Performance (%)"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 42, hjust = 1),
+    legend.position = "none" # Remove legend for simplicity
+  )
+```
+
+### Line with the maximum and minimum number of on-time trips
+
+```{r}
+
+# Exclude rows where line is "Systemwide" becuase that is overall all
+filtered_data <- subset(mta_data, line != "Systemwide")
+
+# Calculate the total number of on-time trips for each line
+line_on_time_trips <- aggregate(num_on_time_trips ~ line, data = filtered_data, sum)
+
+# Find the line with the maximum number of on-time trips
+max_on_time_line <- line_on_time_trips[which.max(line_on_time_trips$num_on_time_trips), ]
+
+# Find the line with the minimum number of on-time trips
+min_on_time_line <- line_on_time_trips[which.min(line_on_time_trips$num_on_time_trips), ]
+
+# Display the results
+print(paste("The line with the maximum on-time trips is Line", max_on_time_line$line,
+            "with", max_on_time_line$num_on_time_trips, "on-time trips."))
+
+print(paste("The line with the minimum on-time trips is Line", min_on_time_line$line,
+            "with", min_on_time_line$num_on_time_trips, "on-time trips."))
+
+```
+
+### which Month has most and least on-time performance?
+
+```{r}
+
+# Convert the 'month' column to Date type if it's not already
+mta_data$month <- as.Date(mta_data$month, format = "%Y-%m-%d")
+
+# Calculate the average terminal on-time performance for each month
+monthly_performance <- aggregate(terminal_on_time_performance ~ format(month, "%Y-%m"), data = mta_data, mean)
+
+# Rename columns for clarity
+colnames(monthly_performance) <- c("month", "avg_terminal_on_time_performance")
+
+# Find the month with the highest terminal on-time performance
+max_performance_month <- monthly_performance[which.max(monthly_performance$avg_terminal_on_time_performance), ]
+
+# Find the month with the lowest terminal on-time performance
+min_performance_month <- monthly_performance[which.min(monthly_performance$avg_terminal_on_time_performance), ]
+
+# Display the results
+print(paste("The month with the highest terminal on-time performance is", max_performance_month$month,
+            "with an average on-time performance of", round(max_performance_month$avg_terminal_on_time_performance, 2), "%."))
+
+print(paste("The month with the lowest terminal on-time performance is", min_performance_month$month,
+            "with an average on-time performance of", round(min_performance_month$avg_terminal_on_time_performance, 2), "%."))
+
+```
+
+### Yearly on-time performance trend from 2020 to 2024
+
+To analyze the yearly terminal on-time performance trend from 2020 to 2024, I examined the average on-time performance for each year, highlighting how the subway system adapted during and after the COVID-19 pandemic.
+
+```{r}
+# Analyze the yearly on-time performance trend from 2020 to 2024
+mta_data |>
+  # Convert 'month' to Date format if not already in Date format
+  mutate(month = as.Date(month, format = "%Y-%m-%d")) |>
+  
+  # Extract the year from the 'month' column
+  mutate(year = format(month, "%Y")) |>
+  
+  # Calculate the average on-time performance for each year
+  group_by(year) |>
+  summarize(avg_terminal_on_time_performance = mean(terminal_on_time_performance, na.rm = TRUE)) |>
+  
+  # Plot the trend over years
+  ggplot(aes(x = as.numeric(year), y = avg_terminal_on_time_performance)) +
+  geom_line(color = "blue") +
+  geom_point(color = "blue") +
+  labs(title = "Yearly Terminal On-Time Performance Trend (2020-2024)",
+       x = "Year",
+       y = "Average On-Time Performance (%)") +
+  theme_minimal()
+```
+
+### Top 5 Reliable Subway Lines for 2020–2022
+
+```{r}
+# Convert 'month' column to Date format if it's not already
+mta_data <- mta_data |>
+  mutate(month = as.Date(month, format = "%Y-%m-%d")) |>
+  
+  # Extract the year from the 'month' column
+  mutate(year = as.numeric(format(month, "%Y")))
+
+# Function to calculate top 5 lines for a specific year
+get_top_5_lines <- function(data, year) {
+  data |>
+    filter(year == !!year & !is.na(terminal_on_time_performance)) |>
+    group_by(line) |>
+    summarize(avg_on_time_performance = mean(terminal_on_time_performance, na.rm = TRUE), .groups = "drop") |>
+    arrange(desc(avg_on_time_performance)) |>
+    slice_head(n = 5) |>
+    mutate(year = as.character(year))
+}
+
+# Calculate top 5 lines for 2020, 2021, and 2022
+top_5_2020 <- get_top_5_lines(mta_data, 2020)
+top_5_2021 <- get_top_5_lines(mta_data, 2021)
+top_5_2022 <- get_top_5_lines(mta_data, 2022)
+
+# Combine the results into one data frame
+top_lines_combined <- bind_rows(top_5_2020, top_5_2021, top_5_2022)
+
+# Plotting the top 5 lines for each year
+ggplot(top_lines_combined, aes(x = reorder(line, avg_on_time_performance), 
+                               y = avg_on_time_performance, fill = year)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) +
+  labs(title = "Top 5 Reliable Subway Lines for 2020–2022",
+       x = "Subway Line",
+       y = "Average On-Time Performance (%)",
+       fill = "Year") +
+  scale_fill_manual(values = c("2020" = "blue", "2021" = "orange", "2022" = "green")) +
+  coord_flip() +
+  theme_minimal() +
+  theme(legend.position = "top",
+        axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+### How has the overall terminal on-time performance trended each month from 2020 to 2024?
+
+```{r}
+
+# Calculate the average on-time performance for each month across all lines
+monthly_performance <- mta_data |>
+  group_by(month = format(month, "%Y-%m")) |>
+  summarize(avg_terminal_on_time_performance = mean(terminal_on_time_performance, na.rm = TRUE)) |>
+  mutate(month = as.Date(paste0(month, "-01"), format = "%Y-%m-%d"))
+
+# Add a column to indicate the period (COVID vs Post-COVID)
+monthly_performance <- monthly_performance |>
+  mutate(period = ifelse(format(month, "%Y") %in% c("2020", "2021"), "COVID Period (2020-2021)", "Post-COVID Recovery (2022-2024)"))
+
+# Plot the monthly trend with different colors for each period
+ggplot(monthly_performance, aes(x = month, y = avg_terminal_on_time_performance, color = period)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  labs(title = "Monthly Terminal On-Time Performance Trend (2020-2024)",
+       x = "Month",
+       y = "Average On-Time Performance (%)",
+       color = "Period") +
+  theme_minimal() +
+  scale_x_date(date_labels = "%Y-%m", date_breaks = "3 months") +
+  scale_color_manual(values = c("COVID Period (2020-2021)" = "pink", "Post-COVID Recovery (2022-2024)" = "purple")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r warning=FALSE, message=FALSE}
+# Extract month name, month number, and assign a season based on month
+mta_data <- mta_data |>
+  mutate(month_name = format(month, "%B"),
+         month_num = as.numeric(format(month, "%m")),
+         season = case_when(
+           month_num %in% c(12, 1, 2) ~ "Winter",
+           month_num %in% c(3, 4, 5) ~ "Spring",
+           month_num %in% c(6, 7, 8) ~ "Summer",
+           month_num %in% c(9, 10, 11) ~ "Fall"
+         ))
+
+# Calculate the average on-time performance for each month across all years
+seasonal_performance <- mta_data |>
+  group_by(month_name, month_num, season) |>
+  summarize(avg_on_time_performance = mean(terminal_on_time_performance, na.rm = TRUE)) |>
+  arrange(month_num)  # Arrange by month number for chronological order
+
+# Plot the seasonal/monthly trend with colors by season
+ggplot(seasonal_performance, aes(x = reorder(month_name, month_num), y = avg_on_time_performance, color = season, group = 1)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  labs(title = "Seasonal/Monthly Terminal On-Time Performance Trend Across Years",
+       x = "Month",
+       y = "Average On-Time Performance (%)",
+       color = "Season") +
+  theme_minimal() +
+  scale_color_manual(values = c("Winter" = "skyblue", "Spring" = "green", "Summer" = "orange", "Fall" = "brown")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+### How did the on-time performance of the top 5 subway lines evolve over time from 2020 to 2024?
+
+```{r}
+library(gganimate)
+library(gifski)
+
+borough_mapping <- data.frame(
+  line = c("1", "1", "2", "2", "3", "3", "4", "4", "4", "5", 
+           "5", "6", "6", "7", "7", "A", "A", "B", "B", "B", 
+           "C", "C", "D", "D", "D", "E", "E", "F", "F", "F", 
+           "G", "G", "J", "J", "Z", "Z", "L", "L", "N", "N", 
+           "N", "Q", "Q", "R", "R", "R", "S Rock", "S Fkln", "S 42nd"),
+  borough = c("Manhattan", "Bronx", "Brooklyn", "Manhattan", 
+              "Brooklyn", "Manhattan", "Manhattan", "Brooklyn", 
+              "Bronx", "Brooklyn", "Manhattan", "Manhattan", 
+              "Bronx", "Manhattan", "Queens", "Manhattan", 
+              "Brooklyn", "Brooklyn", "Bronx", "Manhattan", 
+              "Manhattan", "Brooklyn", "Brooklyn", "Manhattan", 
+              "Bronx", "Queens", "Manhattan", "Manhattan","Queens", "Brooklyn", 
+              "Queens", "Brooklyn", "Manhattan", "Queens", 
+              "Manhattan", "Queens", "Manhattan", "Brooklyn", 
+              "Queens", "Manhattan", "Brooklyn", "Manhattan", 
+              "Brooklyn", "Queens", "Manhattan", "Brooklyn", 
+              "Manhattan", "Brooklyn", "Manhattan")
+)
+
+# Merge borough information with the MTA data
+mta_data_joined <- mta_data |>
+  inner_join(borough_mapping, by = "line") |>
+  filter(!is.na(borough), !is.na(terminal_on_time_performance)) # Remove NAs
+
+
+# Calculate average on-time performance by borough and year
+avg_performance_by_borough_year <- mta_data_joined |>
+  group_by(borough, year) |>
+  summarize(avg_performance = mean(terminal_on_time_performance, na.rm = TRUE), .groups = "drop")
+
+# Create a line chart to visualize the trends
+ggplot(avg_performance_by_borough_year, aes(x = year, y = avg_performance, color = borough)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Average Terminal On-Time Performance by Borough (2020-2024)",
+    x = "Year",
+    y = "Average On-Time Performance (%)"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+# Load required libraries
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(gganimate)
+
+# Calculate average on-time performance by borough and year
+avg_performance_by_borough_year <- mta_data_joined |>
+  group_by(borough, year) |>
+  summarize(avg_performance = mean(terminal_on_time_performance, na.rm = TRUE), .groups = "drop")
+
+# Create a line chart with animation
+animated_plot <-ggplot(avg_performance_by_borough_year, aes(x = year, y = avg_performance, color = borough)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 2) +
+  labs(
+    title = "Average Terminal On-Time Performance by Borough (2020-2024)",
+    x = "Year",
+    y = "Average On-Time Performance (%)",
+    color = "Borough"
+  ) +
+  theme_minimal() +
+  transition_reveal(year) # Animation based on year
+
+# Render the animation
+# animated_gif <- animate(animated_plot, nframes = 40, fps = 5, width = 800, height = 600, renderer = gifski_renderer())
+
+anim_save("avg_performance_trend.gif", animated_plot)
+```
+
+![Average Terminal On-Time Performance by Borough (2020-2024)](avg_performance_trend.gif)
+
+
+### Key Takeaways:
+
+1.Lines such as GS, S 42nd, and FS emerged as the most reliable across all periods. 2.The system demonstrated resilience, with significant recovery post-COVID despite ongoing challenges. 3.Seasonal and monthly trends offer actionable insights into performance variations that can guide future operational strategies.
+
+These findings align with the broader project objective of understanding how delays, on-time performance, and safety incidents influenced NYC subway efficiency. This analysis provides a foundation for exploring further borough-specific or external factors impacting performance.
