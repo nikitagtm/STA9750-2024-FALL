@@ -29,3 +29,4 @@ format:
   html:
     theme: Cosmo
     toc: false
+    code-fold: true

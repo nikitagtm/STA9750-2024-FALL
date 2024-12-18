@@ -1,0 +1,26 @@
+---
+title: "Individual_part- Nikita Gautam"
+editor: visual
+---
+
+### On-terminal by Borough(2024-2025)
+
+The goal of this analysis is to examine trends in terminal-wide on-time performance across NYC boroughs from 2020 to 2024. By identifying patterns, such as sharp declines, partial recoveries, and borough-specific performance, we aim to uncover how delays and safety incidents may have influenced overall efficiency. This will help pinpoint areas of operational strain and provide insights for improving performance and reliability across the subway system.
+
+```{r}
+knitr::include_graphics("animated_borough_performance.gif")
+```
+
+The graph shows average on-time performance by borough from 2020 to 2024. All boroughs experienced a sharp decline in 2022, likely due to post-pandemic challenges. Queens consistently performed the best,during the low phase. Despite some recovery in 2023, performance slightly declined in 2024 across most boroughs, highlighting persistent operational inefficiencies and borough-specific challenges in maintaining on-time reliability
+
+### Seasonal Impact
+
+Let's identify seasonal and monthly trends. The goal is to highlight how external factors, such as weather and operational challenges, impact system reliability.
+
+```{r}
+knitr::include_graphics("Weather_Impact.png")
+```
+
+The graph shows winter as the least reliable season, likely due to weather-related disruptions, while spring has the highest performance with fewer interruptions, highlighting the need for targeted strategies.
+
+This would be the individual deepth analysis for this topic-
