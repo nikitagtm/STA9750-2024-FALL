@@ -55,9 +55,9 @@ Performance metrics such as terminal on-time rates and delay patterns during pea
 
 ### Comparative Analysis: COVID vs. Post-COVID Incident Distribution
 
-![MTA Incident During COVID](group_project/Incident%20Reasons%20During%20COVID%20Period.jpg)
+![MTA Incident During COVID](Incident%20Reasons%20During%20COVID%20Period.jpg)
 
-![MTA Incident Post COVID](group_project/Incident%20Reasons%20Post%20COVID%20Period.jpg)
+![MTA Incident Post COVID](Incident%20Reasons%20Post%20COVID%20Period.jpg)
 
 To ensure a balanced analysis, both the COVID (2020-2021) and post-COVID (2022-2023) periods are scaled to two years each. Pie charts will illustrate the distribution of incident categories for each period. During the COVID period, signal-related incidents were most prevalent, comprising 33.2% of all incidents, followed by persons on trackbed/police/medical incidents at 30.2%. Other notable categories included track-related incidents (10.8%) and subway car incidents (8.9%). These distributions highlight the operational challenges of maintaining reliability and addressing immediate safety concerns during the pandemic.
 
@@ -67,11 +67,11 @@ Please go to this [link](https://yantingzhao11.github.io/STA9750-2024-FALL/indiv
 
 ### Analysis of MTA Subway Line Performance: Peak vs. Off-Peak Delays
 
-![MTA Train Delays Animation](group_project/animated_bar_chart.gif)
+![MTA Train Delays Animation](animated_bar_chart.gif)
 
 The analysis of subway delay trends, comparing the COVID and Post-COVID periods, highlights significant changes in the performance of various subway lines. The animated bar chart offers a visual comparison of total delays for each subway line across these two timeframes. Delays generally increased for most subway lines, especially as New York City began to reopen. Certain lines, such as the N, F, 6, and A, experienced substantial increases in delays, with some nearly doubling. For example, delays on the N train surged from 60,073 to 100,434 after the pandemic, marking a 67.19% increase. Similarly, the 6 train delays rose from 41,200 to 98,141. This suggests that while delays were reduced during the shutdown, the return to full service and higher ridership in the post-pandemic period has led to an uptick in disruptions.
 
-![MTA Train Delays Line Graph](group_project/total_delays_animation.gif)
+![MTA Train Delays Line Graph](total_delays_animation.gif)
 
 Furthermore,the animated plot was created to show how total delays changed monthly for both peak and off-peak periods. The plot revealed several trends, including a significant drop in delays during the early months of 2020, followed by a surge in delays as the city reopened and ridership increased. First quarter of 2020 saw a significant drop in delays due to the NYC shutdown in response to the pandemic. Mid-2021 marked the highest surge in delays, coinciding with the city's phased reopening and increased ridership.
 
@@ -81,7 +81,7 @@ Please go to this [link](https://chloe384.github.io/STA9750-2024-FALL/individual
 
 The analysis focuses on the persons on trackbed/police/medical category from incidents and compares the average annual number of safety incidents across numbered subway lines and lettered subway lines. 
 
-![Numbered Subway Lines](group_project/numbered_line.png)
+![Numbered Subway Lines](numbered_line.png)
 
 For numbered subway lines, the bar chart shows that while the average annual number of safety incidents is decreased for the 6 and 4 train, it is increased on all other lines, so the overall trends from covid to post-covid time periods increase by 13.61%. The 6 train has the highest average incidents during both periods but decreased to 9.3 in post-COVID. The 5 train and 7 train have increase the most of almost any numbered subway line.
 
@@ -120,19 +120,19 @@ Please go to this \[On-Terminal Performance(2020-2024)\](topic-https://nikitagtm
 
 ***Ridership Trend Analysis by Line***
 
-Graph 1: ![Ridership trend](group_project/ridership_plot.png)
+Graph 1: ![Ridership trend](ridership_plot.png)
 
 Ridership and wait time data provide insights into system dynamics across lines: High-Ridership Lines: Lines 1, 6, and 4 experience the highest ridership due to their service in densely populated and commercially active areas. Low-Ridership Lines: Shuttle services (e.g., S Rock, S Fkn, S 42nd) show the lowest ridership due to their limited scope. Passenger Distribution: Ridership on high-use lines (e.g., 1, 6) contrasts sharply with mid-tier lines (e.g., Q, R, C), reflecting variations in population density, service frequency, and transit connectivity
 
 ***Average Wait Time Analysis by Line***
 
-Graph 2: ![Average wait time](group_project/avg_time_plot.png)
+Graph 2: ![Average wait time](avg_time_plot.png)
 
 Line Variability: Shuttle lines consistently have the lowest wait times due to their shorter routes, while lines like B, D, M, and R face higher wait times, often due to congestion or complex operations. Trends Over Time: Most lines exhibit stable wait times across pre-COVID, COVID, and post-COVID periods, with notable variability on lines like C and R due to operational changes.
 
 ***Correlation Analysis***
 
-Graph3: ![Correlation](group_project/correlation_plot.png)
+Graph3: ![Correlation](correlation_plot.png)
 
 Higher ridership shows a weak positive correlation with wait times, but service frequency and efficiency significantly influence outcomes. Effective strategies on shuttle and high-ridership lines highlight potential for managing demand. These insights support improving subway safety, performance, and reliability by addressing congestion and enhancing operations on busy routes.[TimbilaNikiema](https://timbila614.github.io/STA9750-2024-FALL/Individual_report.html)
 
