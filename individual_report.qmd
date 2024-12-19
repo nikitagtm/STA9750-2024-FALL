@@ -8,7 +8,7 @@ format:
 
 ::: {.callout-tip title="Overarching Question"}
 ### How have delays, on-time performance, and safety incidents influenced the efficiency of subway lines across NYC boroughs from 2020 to 2024?
-This final analysis report answers the question: "How have delays, on-time performance, and safety incidents influenced the efficiency of subway lines across NYC boroughs from 2020 to 2024?" It examines the impact of these factors during the COVID and post-COVID periods, highlighting performance trends and offering insights for improving system reliability. You can read the full analysis [Final Analysis Report](https://nikitagtm.github.io/STA9750-2024-FALL/individual_report.htm).
+This final analysis report answers the question: "How have delays, on-time performance, and safety incidents influenced the efficiency of subway lines across NYC boroughs from 2020 to 2024?" It examines the impact of these factors during the COVID and post-COVID periods, highlighting performance trends and offering insights for improving system reliability. You can read the full analysis [Final Analysis Report](https://nikitagtm.github.io/STA9750-2024-FALL/summary_report.html).
 :::
 
 ### On-Time Performance of Subway Lines Across NYC Boroughs (2020–2024)
