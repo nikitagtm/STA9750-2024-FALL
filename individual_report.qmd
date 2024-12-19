@@ -509,14 +509,14 @@ ggplot(correlation_data, aes(x = Total_Scheduled_Trips, y = Total_On_Time_Trips)
   scale_x_continuous(labels = scales::comma) +
   scale_y_continuous(labels = scales::comma)
 ```
-The strong positive correlation (0.98) indicates when more trips are scheduled, subway lines generally perform better in terms of on-time performance, indicating effective management and scheduling. 
+The strong positive correlation (0.98) indicates when more trips are scheduled, subway lines generally perform better in terms of on-time performance.
 :::
 
 ::: {.callout-tip title="Key Takeaways:"}
 
 • On-time performance peaked in 2020 and gradually improved from 2022, showing disruptions during COVID and recovery after.
 
-• Spring (especially May) showed the highest performance, while winter (especially February) had the lowest, likely due to weather-related challeng
+• Spring (especially May) showed the highest performance, while winter (especially February) had the lowest, likely due to weather-related challenges.
 
 • Queens recovered fastest, while Brooklyn showed the steepest decline and slowest recovery, with the Bronx and Manhattan showing moderate recovery.
 
