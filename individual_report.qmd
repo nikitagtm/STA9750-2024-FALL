@@ -1,40 +1,45 @@
 ---
-title: "Personal MTA performance Analysis Report"
+title: "MTA On-time Performance Analysis"
 editor: visual
 format:
   html: 
     code-fold: true
 ---
 
+::: {.callout-tip title="Overarching Question"}
+### How have delays, on-time performance, and safety incidents influenced the efficiency of subway lines across NYC boroughs from 2020 to 2024?
+This final analysis report answers the question: "How have delays, on-time performance, and safety incidents influenced the efficiency of subway lines across NYC boroughs from 2020 to 2024?" It examines the impact of these factors during the COVID and post-COVID periods, highlighting performance trends and offering insights for improving system reliability. You can read the full analysis [Final Analysis Report](https://nikitagtm.github.io/STA9750-2024-FALL/individual_report.htm).
+:::
 
-### What is the trend in terminal on-time performance from 2020 to 2024? How does performance differ between the COVID period (2020-2021) and post-COVID recovery (2022-2024)?
+### On-Time Performance of Subway Lines Across NYC Boroughs (2020–2024)
 
 ### Introduction:
+This individual report explores terminal on-time performance with a specific focus on the variations between the two periods, the seasonal impacts, weekday vs. weekend performance, borough-specific recovery, and the overall relationship between scheduled and on-time trips. The findings are intended to provide a clearer picture of how performance evolved during the pandemic and recovery phases, and how it has influenced subway system efficiency.
 
-This report is part of the group project titled: ***How have delays, on-time performance, and safety incidents influenced the efficiency of subway lines across NYC boroughs from 2020 to 2024?***. My specific contribution focuses on analyzing the trend in terminal on-time performance from 2020 to 2024 and comparing the performance between the COVID period (2020–2021) and post-COVID recovery (2022–2024).
+### Conclusion:
+This analysis provides a comprehensive overview of how delays, on-time performance, and safety incidents have influenced the efficiency of NYC subway lines from 2020 to 2024. By examining trends during the COVID period and the post-COVID recovery, we identified significant disruptions caused by the pandemic, such as reduced ridership, simplified operations, and subsequent challenges during the recovery phase. The findings reveal that on-time performance peaked during the early COVID period due to fewer passengers, but gradually declined through 2021, with a steady recovery beginning as the city reopened.
 
-This project examines NYC subway terminal on-time performance from 2020 to 2024, focusing on trends, borough-specific patterns, and the impacts of COVID and post-COVID recovery. By analyzing delays, seasonal influences, and operational capacity, the study identifies peak and low-performing periods and lines, highlighting areas for improvement. The analysis also explores weekday vs. weekend performance, borough-level disparities, and correlations between scheduled and on-time trips. This helps answer the question: How have delays, on-time performance, and safety incidents influenced the efficiency of subway lines across NYC boroughs from 2020 to 2024? by revealing the underlying factors driving system inefficiencies and proposing actionable strategies to enhance subway reliability and efficiency.
+Seasonal factors, particularly winter weather disruptions, also played a key role in influencing performance, with February 2024 showing the lowest on-time performance. Borough-level analysis showed that while Queens demonstrated the fastest recovery, Brooklyn faced a slower rebound, pointing to the need for tailored recovery strategies in different boroughs. Additionally, the correlation between scheduled trips and on-time performance emphasized the importance of effective scheduling, as higher operational loads were often linked to reduced efficiency.
 
-### Conclusion of the Report:
-
-The analysis of NYC subway terminal on-time performance from 2020 to 2024 reveals key operational patterns. During the COVID period (2020–2021), reduced ridership drove a peak performance of 94% in May 2020. Post-COVID recovery (2022–2024) faced challenges, with on-time performance dropping to 78% in February 2024, as shown in the Terminal On-Time Performance Trend. Seasonal trends highlight February as the lowest-performing month, while May consistently exceeded 85% reliability, according to the Seasonal Trends chart.
-
-Weekdays outperformed weekends significantly, with over 8 million weekday on-time trips compared to 3 million on weekends, as seen in the Weekday vs Weekend chart. Additionally, the Impact of Total Scheduled Trips scatter plot shows a decline in performance as trips increased, falling below 85% at higher scheduling loads.
-
-Queens exhibited the strongest recovery post-COVID, while Brooklyn saw the steepest decline. Reliable lines like GS and S 42nd, maintaining over 99% performance, offer benchmarks for system improvement
+Line-specific analysis revealed that some lines, such as the GS and S 42nd, maintained exceptional reliability, while others, like S Rock, highlighted areas needing targeted improvements. Overall, this report underscores the impact of both internal and external factors, including delays, safety incidents, and operational loads, on subway efficiency. The insights derived offer a foundation for future improvements in the NYC subway system, particularly in areas where delays and performance disparities are most pronounced.
 
 ### Data sources:
-The primary aim of this analysis is to evaluate how on-time performance and external factors, such as ridership patterns, seasonal variations, and safety incidents, have impacted the operational efficiency of NYC subway lines across boroughs from 2020 to 2024. By analyzing trends during the COVID period (2020–2021) and the post-COVID recovery phase (2022–2024), this study aims to uncover key performance drivers, highlight borough-specific and seasonal disparities, and propose actionable strategies to improve system reliability and efficiency. The data source for this analysis is the  [MTA Terminal On-Time Performance Dataset from 2020 to 2024](https://data.ny.gov/Transportation/MTA-Subway-Terminal-On-Time-Performance-Beginning-/vtvh-gimj/data_preview).
+For this analysis, the data was sourced from the [MTA Terminal On-Time Performance Dataset from 2020 to 2024](https://data.ny.gov/Transportation/MTA-Subway-Terminal-On-Time-Performance-Beginning-/vtvh-gimj/data_preview).The dataset contains key performance metrics including the number of scheduled trips, the number of on-time trips, and terminal on-time performance percentages for each subway line across different boroughs.
+
+### Limitation: 
+While the dataset offers valuable insights, it is limited in that it focuses only on the period from 2020 to 2024, excluding long-term pre-pandemic data, which could provide additional context. Additionally, the dataset does not account for external factors such as policy changes, economic influences, and infrastructural issues, which could also influence on-time performance.
 
 ### The literature:
 
-The [literature](https://media4.manhattan-institute.org/sites/default/files/five-ways-to-improve-nyc-subway-operations-CH.pdf) report complements the on-terminal performance analysis by identifying strategies that directly influence terminal efficiency. Recommendations like nightly maintenance shutdowns align with the analysis, which highlighted delays and their impact on performance. Similarly, the emphasis on improving passenger flow and reevaluating speed restrictions supports findings that higher operational efficiency and reduced congestion improve terminal on-time performance. Both studies underscore the importance of targeted interventions to enhance subway reliability and reduce delays system-wide
+The [literature](https://ideas.repec.org/a/taf/transr/v41y2021i3p374-392.html) discusses COVID-19's impact on public transport, emphasizing the need for evidence-based planning to address disruptions in ridership and service capacity. This is relevant to my analysis, as it mirrors the challenges faced by the NYC subway during the pandemic, such as reduced on-time performance. Their focus on recovery planning aligns with my findings on borough-specific recovery trends and the importance of optimized scheduling for post-COVID efficiency..
 
-## Setup libraries needed for analysis
+### Importance of On-Time Performance in Addressing the Overarching Question:
+Analyzing on-time performance trends during the COVID-19 and post-pandemic periods provides insights into the efficiency and resilience of NYC subway lines. It highlights the impact of disruptions, borough-specific recovery, and the connections between delays, safety issues, and overall performance, guiding improvements to the system.
 
+## Setup libraries needed for analysis:
 I leveraged several powerful libraries to streamline the process.It allowed me to efficiently manipulate and clean the dataset, calculate trends, and generate high-quality visualizations to uncover insights.
 
-```{r setup, include=FALSE}
+```{r warning=FALSE,message=FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 
 if(!require("tidyverse")) install.packages("tidyverse")
@@ -53,10 +58,8 @@ library(DT)
 library(gganimate)
 ```
 
-### Load data
-
-I am loading the data which is sourced from the [MTA Open Data platform](data.ny.gov). I am assigning the variable **url** to link to dataset. Following that I will be viewing the first few rows of the dataset to get a quick overview of its structure and contents for a better understanding. Also, I am using the glimpse() function from the dplyr package in R. This function provides a quick overview of the structure of the mta_data dataset.
-
+### Load data:
+I am loading the dataset from the [MTA Open Data platform](data.ny.gov) and assigning it to the variable url. To understand its structure and contents, I will view the first few rows and use the glimpse() function from the dplyr package for a quick structural overview.
 ```{r}
 url <- "https://data.ny.gov/api/views/vtvh-gimj/rows.csv?accessType=DOWNLOAD"
 
@@ -67,8 +70,7 @@ DT::datatable(mta_data)
 ```
 
 ### Data Cleaning:
-
-I will be dropping rows with missing values eliminates the risk of errors in calculations, statistical models, or visualizations later in the analysis annd verify the cleaning process. I will also categorize period between 2020-2021 as COVID and 2022-2024 as Post-Covid
+I will drop rows with missing values to ensure accurate analysis and verify the cleaning process. Additionally, I will categorize 2020–2021 as COVID and 2022–2024 as Post-COVID for analys
 
 ```{r warning=FALSE,message=FALSE}
 # Drop rows with missing values in all columns
@@ -99,12 +101,12 @@ mta_data$day_type <- as.factor(mta_data$day_type)
 levels(mta_data$day_type) <- c("Weekdays", "Weekends")
 
 ```
+Data preparation on the MTA dataset by removing rows with missing values and filtering for the years 2020 to 2024.
 
-::: {.callout-tip title="Data Analysis"}
+::: {.callout-tip title="Subway Analysis"}
 
 ### Which subway lines maintain the highest schedule? 
-
-calculate and display the average terminal on-time performance for each subway line from the mta_data dataset. This can help pinpoint the most reliable lines and serve as a benchmark for improving other underperforming lines.
+I will calculate and display the average terminal on-time performance for each subway line in the mta_data dataset to identify the most reliable lines and set benchmarks for improving underperforming ones.
 
 ```{r warning=FALSE, message=FALSE}
 # Calculate the average terminal on-time performance for each line
@@ -117,11 +119,12 @@ top_lines <- mta_data |>
  DT::datatable(top_lines)
 ```
 
-The results show that the GS line and S 42nd line have the highest average on-time performance, both exceeding 99%. This indicates exceptional reliability and operational efficiency, likely due to their shorter routes and specialized nature, which involve fewer stops and lower complexity. These lines set a benchmark for on-time performance and can provide insights into improving other underperforming subway lines.
+The results show that the GS and S 42nd lines have the highest average on-time performance, exceeding 99%. Their shorter routes and lower complexity contribute to exceptional reliability, setting a benchmark for improving other underperforming lines.
+
 :::
 ::: {.callout-tip title="Trend Analysis"}
 ### Comparison of Terminal On-Time Performance: COVID vs Post-COVID 
-The goal of this code is to compare monthly trends in average terminal on-time performance between the COVID and Post-COVID periods. By grouping the data by period and month, the analysis calculates the average on-time performance for each period, visualizing the differences using a line graph.
+The goal is to compare monthly trends in average terminal on-time performance between COVID and Post-COVID periods by grouping data by period and month, calculating averages, and visualizing the differences with a line graph.
 
 ```{r warning=FALSE, message=FALSE}
 # Group by Period and Month
@@ -145,12 +148,10 @@ ggplot(performance_by_period, aes(x = month, y = avg_performance, color = period
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
-The graph shows terminal on-time performance trends during COVID (2020–2021) and post-COVID (2022–2024). During COVID, performance peaked above 90% due to reduced ridership but declined steadily to 80% by late 2021. Post-COVID, performance began lower, fluctuating between 78% and 83% in 2022. Gradual recovery followed, reaching 85% by late 2024, reflecting improved operational adjustments. The analysis highlights greater stability during COVID and fluctuating recovery post-COVID due to increased ridership and system strain.
+The graph shows that average on-time performance peaked in 2020 during the early COVID period, likely due to reduced ridership and simplified operations. However, performance declined through 2021 and began recovering steadily from 2022 onward, showing gradual improvement through 2024.
 
 ### Trends in Terminal On-Time Performance: Peak and Low Periods (2020–2024)
-
-The goal of this analysis is to evaluate monthly trends in terminal on-time performance from 2020 to 2024. By calculating the average on-time performance for each month, the analysis identifies the best-performing month (most on-time) and the worst-performing month (least on-time).
-
+This analysis evaluates monthly trends in terminal on-time performance (2020–2024) to identify the best and worst-performing months based on average on-time performance.
 ```{r warning=FALSE, message=FALSE}
 # Calculate monthly average on-time performance
 monthly_performance <- mta_data |>
@@ -180,14 +181,14 @@ ggplot(monthly_performance, aes(x = month, y = avg_performance)) +
   theme_minimal()
 
 ```
-This graph shows NYC subway on-time performance trends from 2020 to 2024, highlighting a peak of 94% in May 2020 during reduced COVID ridership and a low of 78% in February 2024 amid winter disruptions and post-COVID challenges. Performance declined steadily post-2020, reflecting rising operational strain, emphasizing the need for targeted measures to enhance winter efficiency and overall system reliability.
+The graph shows that the highest average on-time performance (0.94%) occurred in 2020 during the early COVID period. In contrast, the lowest on-time performance (0.78%) was recorded in 2024 during the post-COVID recovery phase, reflecting ongoing operational challenges and increased system demand.
 :::
 
 
 ::: {.callout-tip title="Comparison Analysis"}
 
 ### Weekday vs Weekend Trends
-This analysis compares total on-time trips between weekdays and weekends to highlight differences in operational efficiency and service demand across day types.
+This analysis compares total on-time trips on weekdays and weekends to reveal differences in operational efficiency and service demand..
 
 ```{r}
 
@@ -208,10 +209,10 @@ ggplot(weekend_weekday_summary, aes(x = day_type, y = Total_On_Time_Trips, fill 
   scale_fill_manual(values = c("Weekdays" = "skyblue", "Weekends" = "orange")) +
   scale_x_discrete(labels = c("Weekdays", "Weekends"))
 ```
-The bar chart compares total on-time trips between weekdays and weekends. Weekdays significantly outperform weekends in terms of on-time trips, reflecting higher service frequency and operational demand during the workweek. The disparity highlights the impact of reduced schedules and possibly lower operational efficiency on weekends.
+The chart shows significantly higher total on-time trips on weekdays compared to weekends, reflecting greater service demand and operational efficiency during weekdays.
 
 ### Comparing Terminal On-Time Performance: COVID vs Post-COVID Analysis
-This code compares terminal on-time performance during the COVID (2020–2021) and Post-COVID (2022–2024) periods by calculating and visualizing key metrics: average, minimum, and maximum performance. 
+This analysis compares terminal on-time performance during the COVID and Post-COVID periods by evaluating key metrics: average, minimum, and maximum performance, providing a clear view of trends and variability across both periods.
 
 ```{r}
 # Calculate average, min, and max performance, and identify specific months
@@ -267,16 +268,13 @@ ggplot(performance_summary_long, aes(x = Performance, y = Metric, fill = period)
 
 
 ```
-***Minimum Performance***: Improved from June 2021 (COVID) to February 2024 (Post-COVID), indicating enhanced reliability during the lowest-performing periods.
-***Maximum Performance***: Increased from July 2020 (COVID) to May 2022 (Post-COVID), reflecting operational efficiency at its peak.
-***Average Performance***: Higher during Post-COVID (September 2024) compared to COVID (April 2021), showcasing overall system recovery and stability.
 
+The graph shows similar maximum on-time performance during COVID and post-COVID (0.94%), but the minimum dropped from 0.83% to 0.78%, and the average declined from 0.89% to 0.87%, highlighting increased variability and operational challenges post-COVID.
 :::
 ::: {.callout-tip title="Borough Analysis"}
 
 ### How did the on-time performance of the top 5 subway lines evolve over time from 2020 to 2024?
-
-This code analyzes and visualizes the average terminal on-time performance across NYC boroughs from 2020 to 2024. By grouping performance data by borough and year, it identifies trends and variations over time.
+This analysis visualizes NYC boroughs average terminal on-time performance (2020–2024), highlighting yearly trends and variations.
 ```{r}
 borough_mapping <- data.frame(
   line = c("1", "1", "2", "2", "3", "3", "4", "4", "4", "5", 
@@ -344,16 +342,14 @@ anim_save("borough_performance.gif", animated_plot)
 
 knitr::include_graphics("borough_performance.gif")
 ```
-
-The GIF illustrates a post-COVID decline in on-time performance across all boroughs from 2020 to 2022. Queens shows the strongest recovery trend, outperforming others by 2024. Brooklyn experiences the steepest decline and slowest rebound. The Bronx and Manhattan show moderate recovery post-2022.
+The analysis shows a post-COVID decline in on-time performance (2020–2022), with Queens recovering strongest by 2024. Brooklyn experiences the steepest decline, while the Bronx and Manhattan show moderate recovery.
 :::
 
 
 ::: {.callout-tip title="Analyzing lines and Terminal"}
 
 ### Identifying Lines with Maximum and Minimum On-Time Trips
-
-Calculating the total on-time trips for each subway line (excluding "Systemwide") to identify the best-performing line with the most on-time trips and the least-performing line with the fewest
+Identifying the subway lines with the highest and lowest total on-time trips helps assess operational efficiency and pinpoint performance disparities. This provides insight into how delays and on-time performance vary across lines, contributing to an understanding of their impact on system-wide efficiency and borough-specific trends from 2020 to 2024.
 
 ```{r}
 
@@ -377,12 +373,10 @@ print(paste("The line with the minimum on-time trips is Line", min_on_time_line$
             "with", min_on_time_line$num_on_time_trips, "on-time trips."))
 
 ```
-
-Line 7 recorded the highest reliability with 893,206 on-time trips, indicating strong performance and operational efficiency. In contrast, Line S Rock had the lowest with 12,216 on-time trips, highlighting its limited service capacity or operational challenges.
+Line 7, with the highest on-time trips (893,206), demonstrates exceptional efficiency and demand, while Line S Rock, with the lowest (12,216), highlights limited usage or operational challenges, emphasizing disparities in subway line performance.
 
 ### Best and Worst Months for Terminal On-Time Performance
-
-This code calculates the average monthly terminal on-time performance to identify the best-performing and worst-performing months, providing insights into trends and operational efficiency over time.
+This calculates average monthly on-time performance to identify the best and worst months, revealing trends and operational efficiency.
 
 ```{r}
 
@@ -410,14 +404,12 @@ print(paste("The month with the lowest terminal on-time performance is", min_per
 
 ```
 
-The highest terminal on-time performance occurred in May 2020 with 94%, likely due to reduced ridership during the early COVID period. In contrast, the lowest performance was in February 2024 at 78%, reflecting ongoing operational challenges and increased demand in the post-COVID recovery phase.
-
-
+May 2020 had the highest on-time performance (0.94%), possibly due to reduced ridership during COVID, while February 2024 had the lowest (0.78%), which might be influenced by seasonal factors and post-COVID recovery challenges.
 ::: 
+
+::: {.callout-tip title="Seasonal Analysis"}
 ### Seasonal and Monthly Trends in Terminal On-Time Performance
-
-This analysis reveals how terminal on-time performance varies by season and month, highlighting seasonal impacts, monthly trends, and periods needing targeted improvements.
-
+Now, let’s analyze how terminal on-time performance varies by season and month to uncover seasonal impacts, monthly trends, and identify periods needing targeted improvements.
 ```{r warning=FALSE, message=FALSE}
 # Extract month name, month number, and assign a season based on month
 mta_data <- mta_data |>
@@ -449,15 +441,14 @@ ggplot(seasonal_performance, aes(x = reorder(month_name, month_num), y = avg_on_
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Spring shows the highest performance, peaking in May, while Winter, especially February, records the lowest due to weather disruptions. Summer and Fall remain stable with minor fluctuations, highlighting winter as a key area for improvement.
+The graph shows higher on-time performance in spring, particularly in May, and lower performance in winter, especially February, likely due to weather-related delays. This highlights seasonal impacts on subway efficiency and identifies periods like winter requiring targeted improvements.
+
 :::
 
 ::: {.callout-tip title="Corelation Analysis"}
 
 ### Analyzing the Impact of Total Scheduled Trips on On-Time Performance
-
-The aim of this analysis is to understand how the total number of scheduled trips influences the average on-time performance of NYC subway lines. By examining this relationship, we can assess whether higher operational loads negatively impact system efficiency and reliability
-
+This analysis aims to explore how the total number of scheduled trips affects the average on-time performance of NYC subway lines, assessing whether higher operational loads impact efficiency and reliability.
 ```{r}
 # Summarize data: calculate total trips and average on-time performance
 trip_performance_summary <- mta_data %>%
@@ -480,11 +471,10 @@ ggplot(trip_performance_summary, aes(x = total_scheduled_trips, y = avg_on_time_
 
 ```
 
-The analysis reveals that as total scheduled trips increase, the on-time performance decreases, indicating that higher operational loads likely lead to more delays and reduced efficiency in maintaining schedule
+The graph shows that as total scheduled trips increase, average on-time performance decreases, indicating that higher operational loads may lead to delays and reduced efficiency across subway lines.
 
 ### Corelation between total scheduled trips and on-time trips
-This analysis explores the relationship between total scheduled trips and total on-time trips for NYC subway divisions. A strong positive correlation is visualized, highlighting how operational efficiency scales with scheduling demands.
-
+This analysis calculates and visualizes the correlation between total scheduled trips and on-time trips for NYC subway divisions, highlighting their relationship over time with a scatter plot and regression line.
 ```{r}
 # Extract year from the 'month' column (assuming it's in YYYY-MM-DD format)
 mta_data$Year <- year(as.Date(mta_data$month, format = "%Y-%m-%d"))
@@ -519,19 +509,34 @@ ggplot(correlation_data, aes(x = Total_Scheduled_Trips, y = Total_On_Time_Trips)
   scale_x_continuous(labels = scales::comma) +
   scale_y_continuous(labels = scales::comma)
 ```
-The scatter plot visualizes the strong positive correlation (r = 0.98) between total scheduled trips and on-time trips for NYC subway divisions (A and B). The blue regression line confirms that as scheduled trips increase, on-time trips also rise proportionally, indicating efficient handling of operational demands. Division-level clustering highlights performance differences, with both divisions maintaining high reliability.
+The strong positive correlation (0.98) indicates when more trips are scheduled, subway lines generally perform better in terms of on-time performance, indicating effective management and scheduling. 
 :::
 
-### Key Takeaways:
+::: {.callout-tip title="Key Takeaways:"}
 
-• Reduced ridership during 2020–2021 led to a peak on-time performance of 94% in May 2020, showcasing the benefits of lower operational stress.
+• On-time performance peaked in 2020 and gradually improved from 2022, showing disruptions during COVID and recovery after.
 
-• Recovery in 2022–2024 saw fluctuating performance, with on-time rates dropping to 78% in February 2024 due to increased ridership and system strain.
+• Spring (especially May) showed the highest performance, while winter (especially February) had the lowest, likely due to weather-related challeng
 
-• Winter months like February consistently recorded the lowest performance (78%), while spring months like May achieved the highest reliability (94%).
+• Queens recovered fastest, while Brooklyn showed the steepest decline and slowest recovery, with the Bronx and Manhattan showing moderate recovery.
 
-• Queens recovered strongly post-COVID, while Brooklyn faced the steepest declines, indicating borough-specific operational and infrastructural challenges.
+• Higher scheduled trips were linked to lower on-time performance, suggesting the need for better capacity management.
 
-• Higher scheduled trips correlated with decreased on-time performance, emphasizing the strain of scaling operations during peak periods.
+• A strong positive correlation (0.98) between scheduled and on-time trips indicates that more scheduled trips lead to better efficiency.
+
+• More scheduled trips correlated with lower on-time performance, suggesting the need for better capacity management.
 
 • Reliable lines like GS and S 42nd maintained over 99% on-time performance, serving as benchmarks, while underperforming lines like S Rock revealed areas needing improvement.
+:::
+
+### Future Scope:
+Future analyses should include pre-pandemic years for long-term trend insights and incorporate external factors like economics, infrastructure, and policies. Comparing with other transit systems could also offer valuable perspectives for improving NYC subway performance.
+
+### Links to my teammates reports that address other aspects of the overarching question:
+[Analysis of MTA Incident Distribution](https://yantingzhao11.github.io/STA9750-2024-FALL/individualreport.html)Examines incident categories during COVID and post-COVID periods and their impact on subway efficiency.
+
+[Subway Line Performance: Peak vs. Off-Peak Delays](https://chloe384.github.io/STA9750-2024-FALL/individual.html)Compares subway delays during COVID and post-COVID, focusing on peak and off-peak periods.
+
+[Safety Incidents on Subway Lines](https://haolinnn.github.io/STA9750-2024-FALL/individual.html)Analyzes safety incidents and trends across subway lines during COVID and post-COVID.
+
+[Ridership and Wait Time Analysis](https://timbila614.github.io/STA9750-2024-FALL/Individual_report.html) Investigates the relationship between ridership and wait times and its effect on subway efficiency.
