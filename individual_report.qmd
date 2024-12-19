@@ -8,7 +8,7 @@ format:
 
 ::: {.callout-tip title="Overarching Question"}
 ### How have delays, on-time performance, and safety incidents influenced the efficiency of subway lines across NYC boroughs from 2020 to 2024?
-This final analysis report answers the question: "How have delays, on-time performance, and safety incidents influenced the efficiency of subway lines across NYC boroughs from 2020 to 2024?" It examines the impact of these factors during the COVID and post-COVID periods, highlighting performance trends and offering insights for improving system reliability. You can read the full analysis [Final Analysis Report](https://nikitagtm.github.io/STA9750-2024-FALL/summary_report.html).
+This [Report](https://nikitagtm.github.io/STA9750-2024-FALL/summary_report.html) analyze how delays, on-time performance, and safety incidents impacted the efficiency of NYC subway lines across boroughs from 2020 to 2024, focusing on trends during the COVID and post-COVID periods and offering insights to enhance system reliability.
 :::
 
 ### On-Time Performance of Subway Lines Across NYC Boroughs (2020–2024)
@@ -31,7 +31,7 @@ While the dataset offers valuable insights, it is limited in that it focuses onl
 
 ### The literature:
 
-The [literature](https://ideas.repec.org/a/taf/transr/v41y2021i3p374-392.html) discusses COVID-19's impact on public transport, emphasizing the need for evidence-based planning to address disruptions in ridership and service capacity. This is relevant to my analysis, as it mirrors the challenges faced by the NYC subway during the pandemic, such as reduced on-time performance. Their focus on recovery planning aligns with my findings on borough-specific recovery trends and the importance of optimized scheduling for post-COVID efficiency..
+The [literature](https://ideas.repec.org/a/taf/transr/v41y2021i3p374-392.html) discusses COVID-19's impact on public transport, emphasizing the need for evidence-based planning to address disruptions in ridership and service capacity. This is relevant to my analysis, as it mirrors the challenges faced by the NYC subway during the pandemic, such as reduced on-time performance. Their focus on recovery planning aligns with my findings on borough-specific recovery trends and the importance of optimized scheduling for post-COVID efficiency.
 
 ### Importance of On-Time Performance in Addressing the Overarching Question:
 Analyzing on-time performance trends during the COVID-19 and post-pandemic periods provides insights into the efficiency and resilience of NYC subway lines. It highlights the impact of disruptions, borough-specific recovery, and the connections between delays, safety issues, and overall performance, guiding improvements to the system.
@@ -70,7 +70,7 @@ DT::datatable(mta_data)
 ```
 
 ### Data Cleaning:
-I will drop rows with missing values to ensure accurate analysis and verify the cleaning process. Additionally, I will categorize 2020–2021 as COVID and 2022–2024 as Post-COVID for analys
+I will drop rows with missing values to ensure accurate analysis and verify the cleaning process. Additionally, I will categorize 2020–2021 as COVID and 2022–2024 as Post-COVID for analysis.
 
 ```{r warning=FALSE,message=FALSE}
 # Drop rows with missing values in all columns
@@ -188,7 +188,7 @@ The graph shows that the highest average on-time performance (0.94%) occurred in
 ::: {.callout-tip title="Comparison Analysis"}
 
 ### Weekday vs Weekend Trends
-This analysis compares total on-time trips on weekdays and weekends to reveal differences in operational efficiency and service demand..
+This analysis compares total on-time trips on weekdays and weekends to reveal differences in operational efficiency and service demand.
 
 ```{r}
 
@@ -533,10 +533,10 @@ The strong positive correlation (0.98) indicates when more trips are scheduled, 
 Future analyses should include pre-pandemic years for long-term trend insights and incorporate external factors like economics, infrastructure, and policies. Comparing with other transit systems could also offer valuable perspectives for improving NYC subway performance.
 
 ### Links to my teammates reports that address other aspects of the overarching question:
-[Analysis of MTA Incident Distribution](https://yantingzhao11.github.io/STA9750-2024-FALL/individualreport.html)Examines incident categories during COVID and post-COVID periods and their impact on subway efficiency.
+[Analysis of MTA Incident Distribution](https://yantingzhao11.github.io/STA9750-2024-FALL/individualreport.html)Examines incident categories during COVID and post periods.
 
 [Subway Line Performance: Peak vs. Off-Peak Delays](https://chloe384.github.io/STA9750-2024-FALL/individual.html)Compares subway delays during COVID and post-COVID, focusing on peak and off-peak periods.
 
-[Safety Incidents on Subway Lines](https://haolinnn.github.io/STA9750-2024-FALL/individual.html)Analyzes safety incidents and trends across subway lines during COVID and post-COVID.
+[Safety Incidents on Subway Lines](https://haolinnn.github.io/STA9750-2024-FALL/individual.html)Analyzes safety incidents and trends across subway lines.
 
-[Ridership and Wait Time Analysis](https://timbila614.github.io/STA9750-2024-FALL/Individual_report.html) Investigates the relationship between ridership and wait times and its effect on subway efficiency.
+[Ridership and Wait Time Analysis](https://timbila614.github.io/STA9750-2024-FALL/Individual_report.html) Investigates the relationship between ridership and wait times.
