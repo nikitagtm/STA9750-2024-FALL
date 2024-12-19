@@ -4,28 +4,33 @@ editor: visual
 format:
   html: 
     code-fold: true
-
 ---
 
-### Individual Report:Trend Analysis of Terminal On-Time Performance (2020–2024)
+
+### What is the trend in terminal on-time performance from 2020 to 2024? How does performance differ between the COVID period (2020-2021) and post-COVID recovery (2022-2024)?
 
 ### Introduction:
 
-This report is part of the group project titled: ***How have delays, on-time performance, and safety incidents influenced the efficiency of subway lines across NYC boroughs from 2020 to 2024?***. My specific contribution focuses on analyzing the trend in terminal on-time performance from 2020 to 2024 and comparing the performance between the COVID period (2020–2021) and post-COVID recovery (2022–2024). We can refer to [Group 2 Project](https://electionlab.mit.edu/) using our web browser for the whole report.
+This report is part of the group project titled: ***How have delays, on-time performance, and safety incidents influenced the efficiency of subway lines across NYC boroughs from 2020 to 2024?***. My specific contribution focuses on analyzing the trend in terminal on-time performance from 2020 to 2024 and comparing the performance between the COVID period (2020–2021) and post-COVID recovery (2022–2024).
+
+This project examines NYC subway terminal on-time performance from 2020 to 2024, focusing on trends, borough-specific patterns, and the impacts of COVID and post-COVID recovery. By analyzing delays, seasonal influences, and operational capacity, the study identifies peak and low-performing periods and lines, highlighting areas for improvement. The analysis also explores weekday vs. weekend performance, borough-level disparities, and correlations between scheduled and on-time trips. This helps answer the question: How have delays, on-time performance, and safety incidents influenced the efficiency of subway lines across NYC boroughs from 2020 to 2024? by revealing the underlying factors driving system inefficiencies and proposing actionable strategies to enhance subway reliability and efficiency.
 
 ### Conclusion of the Report:
 
-The analysis of NYC subway terminal on-time performance trends from 2020 to 2024 reveals significant insights into the operational efficiency and resilience of the system. During the COVID period (2020–2021), on-time performance was relatively high due to reduced ridership and modified schedules, with lines such as GS, S 42nd, and FS demonstrating exceptional reliability. These lines consistently maintained an average on-time performance of over 99%, setting benchmarks for operational excellence.
+The analysis of NYC subway terminal on-time performance from 2020 to 2024 reveals key operational patterns. During the COVID period (2020–2021), reduced ridership drove a peak performance of 94% in May 2020. Post-COVID recovery (2022–2024) faced challenges, with on-time performance dropping to 78% in February 2024, as shown in the Terminal On-Time Performance Trend. Seasonal trends highlight February as the lowest-performing month, while May consistently exceeded 85% reliability, according to the Seasonal Trends chart.
 
-In contrast, the post-COVID recovery period (2022–2024) saw a slight dip in performance as the system adjusted to increasing ridership and operational challenges. However, key lines like GS, FS, and H continued to excel, showcasing the system's capacity for adaptation.
+Weekdays outperformed weekends significantly, with over 8 million weekday on-time trips compared to 3 million on weekends, as seen in the Weekday vs Weekend chart. Additionally, the Impact of Total Scheduled Trips scatter plot shows a decline in performance as trips increased, falling below 85% at higher scheduling loads.
 
-Seasonal and monthly trends highlight a steady recovery trajectory with distinct variations based on operational adjustments during different seasons. The Fall and Spring months exhibited the most consistent improvements, emphasizing the subway system's gradual stabilization.
+Queens exhibited the strongest recovery post-COVID, while Brooklyn saw the steepest decline. Reliable lines like GS and S 42nd, maintaining over 99% performance, offer benchmarks for system improvement
 
 ### Data sources:
+The primary aim of this analysis is to evaluate how on-time performance and external factors, such as ridership patterns, seasonal variations, and safety incidents, have impacted the operational efficiency of NYC subway lines across boroughs from 2020 to 2024. By analyzing trends during the COVID period (2020–2021) and the post-COVID recovery phase (2022–2024), this study aims to uncover key performance drivers, highlight borough-specific and seasonal disparities, and propose actionable strategies to improve system reliability and efficiency. The data source for this analysis is the  [MTA Terminal On-Time Performance Dataset from 2020 to 2024](https://data.ny.gov/Transportation/MTA-Subway-Terminal-On-Time-Performance-Beginning-/vtvh-gimj/data_preview).
 
-I used the [MTA Terminal On-Time Performance Dataset from 2020 to 2024](https://data.ny.gov/Transportation/MTA-Subway-Terminal-On-Time-Performance-Beginning-/vtvh-gimj/data_preview).
+### The literature:
 
-## setup libraries needed for analysis
+The [literature](https://media4.manhattan-institute.org/sites/default/files/five-ways-to-improve-nyc-subway-operations-CH.pdf) report complements the on-terminal performance analysis by identifying strategies that directly influence terminal efficiency. Recommendations like nightly maintenance shutdowns align with the analysis, which highlighted delays and their impact on performance. Similarly, the emphasis on improving passenger flow and reevaluating speed restrictions supports findings that higher operational efficiency and reduced congestion improve terminal on-time performance. Both studies underscore the importance of targeted interventions to enhance subway reliability and reduce delays system-wide
+
+## Setup libraries needed for analysis
 
 I leveraged several powerful libraries to streamline the process.It allowed me to efficiently manipulate and clean the dataset, calculate trends, and generate high-quality visualizations to uncover insights.
 
@@ -35,9 +40,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 if(!require("tidyverse")) install.packages("tidyverse")
 if (!require("lubridate")) install.packages("lubridate")
 if (!require("DT")) install.packages("DT")
-```
 
-```{r warning=FALSE,message=FALSE}
 library(tidyverse)
 library(readxl)
 library(readr)
@@ -47,6 +50,7 @@ library(httr)
 library(readr)
 library(ggplot2)
 library(DT)
+library(gganimate)
 ```
 
 ### Load data
@@ -56,7 +60,6 @@ I am loading the data which is sourced from the [MTA Open Data platform](data.ny
 ```{r}
 url <- "https://data.ny.gov/api/views/vtvh-gimj/rows.csv?accessType=DOWNLOAD"
 
-
 mta_data <- read.csv(url)
 
 # View the first few rows
@@ -65,7 +68,7 @@ DT::datatable(mta_data)
 
 ### Data Cleaning:
 
-I will be dropping rows with missing values eliminates the risk of errors in calculations, statistical models, or visualizations later in the analysis annd verify the cleaning process.
+I will be dropping rows with missing values eliminates the risk of errors in calculations, statistical models, or visualizations later in the analysis annd verify the cleaning process. I will also categorize period between 2020-2021 as COVID and 2022-2024 as Post-Covid
 
 ```{r warning=FALSE,message=FALSE}
 # Drop rows with missing values in all columns
@@ -76,32 +79,83 @@ mta_data <- mta_data |>
 # Clean the data
 mta_data <- mta_data |>
   mutate(month = as.Date(month, format = "%Y-%m-%d")) |>
-  drop_na(terminal_on_time_performance) |>
-  filter(year(month) >= 2020 & year(month) <= 2024)
+  filter(year(month) >= 2020 & year(month) <= 2024) |>
+  drop_na(terminal_on_time_performance)
+
+# Data Cleaning and Preparation
+mta_data <- mta_data |>
+  mutate(
+    month = as.Date(month, format = "%Y-%m-%d"),  # Convert 'month' to Date format
+    period = case_when(                          # Classify as COVID or Post-COVID
+      year(month) %in% c(2020, 2021) ~ "COVID (2020-2021)",
+      year(month) %in% c(2022, 2023, 2024) ~ "Post-COVID (2022-2024)"
+    )
+  ) |>
+  filter(!is.na(terminal_on_time_performance))   # Remove missing performance data
+
+mta_data$day_type <- as.factor(mta_data$day_type)
+
+# Replace day_type levels with "Weekdays" and "Weekends"
+levels(mta_data$day_type) <- c("Weekdays", "Weekends")
+
 ```
 
-::: {.callout-tip title="Data Analysis: What is the trend in terminal on-time performance from 2020–2024?"} \### 1.Which subway lines maintain the highest schedule? To identify the subway lines that consistently perform well in maintaining their schedules, I calculated the average terminal on-time performance for each line using the terminal_on_time_performance metric.
+::: {.callout-tip title="Data Analysis"}
 
-```{r}
+### Which subway lines maintain the highest schedule? 
+
+calculate and display the average terminal on-time performance for each subway line from the mta_data dataset. This can help pinpoint the most reliable lines and serve as a benchmark for improving other underperforming lines.
+
+```{r warning=FALSE, message=FALSE}
 # Calculate the average terminal on-time performance for each line
 top_lines <- mta_data |>
   group_by(line)|>
-  summarize(avg_on_time_performance = mean(terminal_on_time_performance, na.rm = TRUE)) |>
+  summarize(avg_on_time_performance = mean(terminal_on_time_performance, na.rm = TRUE), .groups = "drop") |>
   arrange(desc(avg_on_time_performance))
 
 # View the top lines with the highest average on-time performance
  DT::datatable(top_lines)
 ```
 
-Lines such as GS, S 42nd, and FS serve as benchmarks for operational efficiency and customer satisfaction.
+The results show that the GS line and S 42nd line have the highest average on-time performance, both exceeding 99%. This indicates exceptional reliability and operational efficiency, likely due to their shorter routes and specialized nature, which involve fewer stops and lower complexity. These lines set a benchmark for on-time performance and can provide insights into improving other underperforming subway lines.
+:::
+::: {.callout-tip title="Trend Analysis"}
+### Comparison of Terminal On-Time Performance: COVID vs Post-COVID 
+The goal of this code is to compare monthly trends in average terminal on-time performance between the COVID and Post-COVID periods. By grouping the data by period and month, the analysis calculates the average on-time performance for each period, visualizing the differences using a line graph.
 
-### 
+```{r warning=FALSE, message=FALSE}
+# Group by Period and Month
+performance_by_period <- mta_data |>
+  group_by(period, month) |>
+  summarize(
+    avg_performance = mean(terminal_on_time_performance, na.rm = TRUE), .groups = "drop")
 
-```{r}
+# Plot the Comparison Graph
+ggplot(performance_by_period, aes(x = month, y = avg_performance, color = period, group = period)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Comparison of Terminal On-Time Performance (COVID vs Post-COVID)",
+    x = "Month",
+    y = "Average On-Time Performance (%)",
+    color = "Period"
+  ) +
+  theme_minimal() +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "6 months") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+The graph shows terminal on-time performance trends during COVID (2020–2021) and post-COVID (2022–2024). During COVID, performance peaked above 90% due to reduced ridership but declined steadily to 80% by late 2021. Post-COVID, performance began lower, fluctuating between 78% and 83% in 2022. Gradual recovery followed, reaching 85% by late 2024, reflecting improved operational adjustments. The analysis highlights greater stability during COVID and fluctuating recovery post-COVID due to increased ridership and system strain.
+
+### Trends in Terminal On-Time Performance: Peak and Low Periods (2020–2024)
+
+The goal of this analysis is to evaluate monthly trends in terminal on-time performance from 2020 to 2024. By calculating the average on-time performance for each month, the analysis identifies the best-performing month (most on-time) and the worst-performing month (least on-time).
+
+```{r warning=FALSE, message=FALSE}
 # Calculate monthly average on-time performance
 monthly_performance <- mta_data |>
   group_by(month) |>
-  summarize(avg_performance = mean(terminal_on_time_performance, na.rm = TRUE))
+  summarize(avg_performance = mean(terminal_on_time_performance, na.rm = TRUE), .groups = "drop")
 
 # Identify the most and least on-time months
 most_on_time <- monthly_performance[which.max(monthly_performance$avg_performance), ]
@@ -119,144 +173,45 @@ ggplot(monthly_performance, aes(x = month, y = avg_performance)) +
                 label = paste0("Least On-Time: ", round(least_on_time$avg_performance, 2), "%")), 
             vjust = 1, color = "red") +
   labs(
-    title = "Monthly Terminal On-Time Performance (2020-2024)",
-    x = "Month",
+    title = "Terminal On-Time Performance (2020-2024)",
+    x = "Year",
     y = "Average On-Time Performance (%)"
   ) +
   theme_minimal()
 
 ```
+This graph shows NYC subway on-time performance trends from 2020 to 2024, highlighting a peak of 94% in May 2020 during reduced COVID ridership and a low of 78% in February 2024 amid winter disruptions and post-COVID challenges. Performance declined steadily post-2020, reflecting rising operational strain, emphasizing the need for targeted measures to enhance winter efficiency and overall system reliability.
+:::
 
-### Categorize data for COVID and Post-COVID and visualize
+
+::: {.callout-tip title="Comparison Analysis"}
+
+### Weekday vs Weekend Trends
+This analysis compares total on-time trips between weekdays and weekends to highlight differences in operational efficiency and service demand across day types.
 
 ```{r}
-# Clean and process the data
-mta_data <- mta_data |>
-  mutate(
-    month = as.Date(month, format = "%Y-%m-%d"),  # Convert 'month' to Date format
-    day_type = as.factor(day_type),              # Convert 'day_type' to a factor (1=Weekdays, 2=Weekends)
-    period = case_when(                          # Create a 'period' column
-      year(month) %in% c(2020, 2021) ~ "COVID (2020-2021)",
-      year(month) %in% c(2022, 2023, 2024) ~ "Post-COVID (2022-2024)"
-    )
-  ) |>
-  filter(!is.na(terminal_on_time_performance))   # Remove rows with missing performance data
 
-# Add Peak vs. Off-Peak labeling
-mta_data <- mta_data |>
-  mutate(peak_offpeak = case_when(
-    day_type == 1 ~ "Peak (Weekdays)",
-    day_type == 2 ~ "Off-Peak (Weekends)"
-  ))
-
-# Group by COVID/Post-COVID and Peak/Off-Peak
-performance_covid_peak <- mta_data |>
-  group_by(period, peak_offpeak) |>
-  summarize(
-    avg_performance = mean(terminal_on_time_performance, na.rm = TRUE),
-    min_performance = min(terminal_on_time_performance, na.rm = TRUE),
-    max_performance = max(terminal_on_time_performance, na.rm = TRUE)
-  )
+# Summarize data by day_type (Weekdays vs Weekends)
+weekend_weekday_summary <- mta_data %>%
+  group_by(day_type) %>%
+  summarise(Total_On_Time_Trips = sum(num_on_time_trips, na.rm = TRUE)) %>%
+  arrange(desc(Total_On_Time_Trips))
 
 
-# Plot Peak vs Off-Peak comparison for COVID and Post-COVID periods
-ggplot(performance_covid_peak, aes(x = peak_offpeak, y = avg_performance, fill = period)) +
-  geom_bar(stat = "identity", position = "dodge", color = "black") +
-  labs(
-    title = "Terminal On-Time Performance: Peak vs Off-Peak (COVID vs Post-COVID)",
-    x = "Time Period",
-    y = "Average On-Time Performance (%)",
-    fill = "Period"
-  ) +
+# Plot the data
+ggplot(weekend_weekday_summary, aes(x = day_type, y = Total_On_Time_Trips, fill = day_type)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Comparison of On-Time Trips: Weekdays vs Weekends",
+       x = "Day Type",
+       y = "Total On-Time Trips") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-
-
+  scale_fill_manual(values = c("Weekdays" = "skyblue", "Weekends" = "orange")) +
+  scale_x_discrete(labels = c("Weekdays", "Weekends"))
 ```
+The bar chart compares total on-time trips between weekdays and weekends. Weekdays significantly outperform weekends in terms of on-time trips, reflecting higher service frequency and operational demand during the workweek. The disparity highlights the impact of reduced schedules and possibly lower operational efficiency on weekends.
 
-### Visualize Performance by Period
-
-```{r}
-# Group by Period and Month
-performance_by_period <- mta_data |>
-  group_by(period, month) |>
-  summarize(
-    avg_performance = mean(terminal_on_time_performance, na.rm = TRUE)
-  )
-
-# Plot the Comparison Graph
-ggplot(performance_by_period, aes(x = month, y = avg_performance, color = period, group = period)) +
-  geom_line(size = 1) +
-  geom_point(size = 2) +
-  labs(
-    title = "Comparison of Terminal On-Time Performance (COVID vs Post-COVID)",
-    x = "Month",
-    y = "Average On-Time Performance (%)",
-    color = "Period"
-  ) +
-  theme_minimal() +
-  scale_x_date(date_labels = "%b %Y", date_breaks = "6 months") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-```
-
-### Comparison of Terminal On-Time Performance (COVID vs Post-COVID)
-
-```{r}
-# Separate plots using facet_wrap
-ggplot(performance_by_period, aes(x = month, y = avg_performance)) +
-  geom_line(color = "blue", size = 1) +
-  geom_point(size = 2, color = "red") +
-  facet_wrap(~ period, ncol = 1, scales = "free_y") +  # Create separate plots for each period
-  labs(
-    title = "Comparison of Terminal On-Time Performance (COVID vs Post-COVID)",
-    x = "Month",
-    y = "Average On-Time Performance (%)"
-  ) +
-  theme_minimal() +
-  scale_x_date(date_labels = "%b %Y", date_breaks = "6 months") +
-  theme(
-    strip.text = element_text(size = 12, face = "bold"),
-    axis.text.x = element_text(angle = 45, hjust = 1)
-  )
-
-```
-
-### Terminal On-Time Performance During COVID and post-COVID
-
-```{r}
-
-# Set up the plotting area to create two plots side by side
-par(mfrow = c(2, 1))  # Create a 2-row, 1-column layout
-
-# Plot 1: COVID Period
-with(performance_by_period %>% filter(period == "COVID (2020-2021)"), {
-  plot(
-    month, avg_performance, type = "b", col = "blue", pch = 16, lwd = 2,
-    xlab = "Month", ylab = "On-Time Performance (%)",
-    main = "Terminal On-Time Performance During COVID (2020-2021)",
-    xaxt = "n"
-  )
-  axis(1, at = month, labels = format(month, "%b %Y"), las = 2)
-})
-
-# Plot 2: Post-COVID Period
-with(performance_by_period %>% filter(period == "Post-COVID (2022-2024)"), {
-  plot(
-    month, avg_performance, type = "b", col = "green", pch = 16, lwd = 2,
-    xlab = "Month", ylab = "On-Time Performance (%)",
-    main = "Terminal On-Time Performance Post-COVID (2022-2024)",
-    xaxt = "n"
-  )
-  axis(1, at = month, labels = format(month, "%b %Y"), las = 2)
-})
-
-# Reset plotting area
-par(mfrow = c(1, 1))
-```
-
-### Terminal On-Time Performance: COVID vs Post-COVID
+### Comparing Terminal On-Time Performance: COVID vs Post-COVID Analysis
+This code compares terminal on-time performance during the COVID (2020–2021) and Post-COVID (2022–2024) periods by calculating and visualizing key metrics: average, minimum, and maximum performance. 
 
 ```{r}
 # Calculate average, min, and max performance, and identify specific months
@@ -312,63 +267,93 @@ ggplot(performance_summary_long, aes(x = Performance, y = Metric, fill = period)
 
 
 ```
+***Minimum Performance***: Improved from June 2021 (COVID) to February 2024 (Post-COVID), indicating enhanced reliability during the lowest-performing periods.
+***Maximum Performance***: Increased from July 2020 (COVID) to May 2022 (Post-COVID), reflecting operational efficiency at its peak.
+***Average Performance***: Higher during Post-COVID (September 2024) compared to COVID (April 2021), showcasing overall system recovery and stability.
 
-### Yearly Trends in Terminal On-Time Performance (2020-2024)
+:::
+::: {.callout-tip title="Borough Analysis"}
 
+### How did the on-time performance of the top 5 subway lines evolve over time from 2020 to 2024?
+
+This code analyzes and visualizes the average terminal on-time performance across NYC boroughs from 2020 to 2024. By grouping performance data by borough and year, it identifies trends and variations over time.
 ```{r}
+borough_mapping <- data.frame(
+  line = c("1", "1", "2", "2", "3", "3", "4", "4", "4", "5", 
+           "5", "6", "6", "7", "7", "A", "A", "B", "B", "B", 
+           "C", "C", "D", "D", "D", "E", "E", "F", "F", "F", 
+           "G", "G", "J", "J", "Z", "Z", "L", "L", "N", "N", 
+           "N", "Q", "Q", "R", "R", "R", "S Rock", "S Fkln", "S 42nd"),
+  borough = c("Manhattan", "Bronx", "Brooklyn", "Manhattan", 
+              "Brooklyn", "Manhattan", "Manhattan", "Brooklyn", 
+              "Bronx", "Brooklyn", "Manhattan", "Manhattan", 
+              "Bronx", "Manhattan", "Queens", "Manhattan", 
+              "Brooklyn", "Brooklyn", "Bronx", "Manhattan", 
+              "Manhattan", "Brooklyn", "Brooklyn", "Manhattan", 
+              "Bronx", "Queens", "Manhattan", "Manhattan","Queens", "Brooklyn", 
+              "Queens", "Brooklyn", "Manhattan", "Queens", 
+              "Manhattan", "Queens", "Manhattan", "Brooklyn", 
+              "Queens", "Manhattan", "Brooklyn", "Manhattan", 
+              "Brooklyn", "Queens", "Manhattan", "Brooklyn", 
+              "Manhattan", "Brooklyn", "Manhattan")
+)
+# Ensure borough_mapping has unique mappings
+borough_mapping <- borough_mapping |> distinct(line, borough)
 
-# Bar chart for COVID vs Post-COVID comparison
-ggplot(performance_by_period, aes(x = period, y = avg_performance, fill = period)) +
-  geom_bar(stat = "identity") +
+# Join borough information with the MTA data
+mta_data_joined <- mta_data |>
+  inner_join(borough_mapping, by = "line", relationship = "many-to-many") |>
+  filter(!is.na(borough), !is.na(terminal_on_time_performance)) |> # Remove missing data
+  ungroup()
+
+
+# Extract year from the 'month' column and ensure it's numeric
+mta_data_joined <- mta_data_joined |>
+  mutate(
+    month = as.Date(month, format = "%Y-%m-%d"),  # Convert 'month' to Date
+    year = as.numeric(format(month, "%Y"))       # Extract and ensure 'year' is numeric
+  )
+
+
+# Calculate average on-time performance by borough and year
+avg_performance_by_borough_year <- mta_data_joined |>
+  group_by(borough, year) |>
+  summarize(avg_performance = mean(terminal_on_time_performance, na.rm = TRUE), .groups = "drop")
+
+# Calculate average on-time performance by borough and year
+avg_performance_by_borough_year <- avg_performance_by_borough_year |>
+  group_by(borough) |>
+  filter(n() > 1) |>  # Remove groups with a single observation
+  ungroup()
+
+# Create the animated plot
+suppressWarnings({
+animated_plot <- ggplot(avg_performance_by_borough_year, aes(x = year, y = avg_performance, color = borough, group = borough)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 3) +
   labs(
-    title = "Terminal On-Time Performance: COVID vs Post-COVID",
-    x = "Period",
-    y = "Average On-Time Performance (%)"
-  ) +
-  theme_minimal()
-
-
-
-```
-
-### How does the terminal on-time performance vary across different subway lines from 2020 to 2024?
-
-To identify the subway lines that consistently maintain the highest terminal on-time performance from 2020 to 2024, This approach provides a clear, data-driven way to identify the subway lines that performed the best during the COVID period (2020–2022) and early post-COVID recovery (2023-2024).
-
-```{r}
-# Step 1: Convert 'month' column to Date format
-mta_data$month <- as.Date(mta_data$month, format = "%Y-%m-%d")
-
-# Step 2: Filter data for the period 2020 to 2022
-mta_data_filtered <- mta_data |>
-  filter(month >= as.Date("2020-01-01") & month <= as.Date("2022-12-31"))
-
-# Step 3: Calculate the average terminal on-time performance for each line
-top_lines <- mta_data_filtered |>
-  group_by(line) |>
-  summarize(avg_on_time_performance = mean(terminal_on_time_performance, na.rm = TRUE)) |>
-  arrange(desc(avg_on_time_performance))
-
-# Step 4: Select the top 10 lines with the highest average on-time performance
-top_10_lines <- top_lines |> 
-  slice_head(n = 10)
-
-# Step 5: Plot the top 10 lines using a bar chart in descending order
-ggplot(top_10_lines, aes(x = reorder(line, -avg_on_time_performance), y = avg_on_time_performance, fill = line)) +
-  geom_bar(stat = "identity") +
-  labs(
-    title = "Top 10 Lines by Average On-Time Performance COVID period (2020–2022)",
-    x = "Subway Line",
-    y = "Average On-Time Performance (%)"
+    title = "Average Terminal On-Time Performance by Borough (2020–2024)",
+    x = "Year",
+    y = "Average On-Time Performance (%)",
+    color = "Borough"
   ) +
   theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = 42, hjust = 1),
-    legend.position = "none" # Remove legend for simplicity
-  )
+  transition_reveal(year)})
+
+anim_save("borough_performance.gif", animated_plot)
+
+knitr::include_graphics("borough_performance.gif")
 ```
 
-### Line with the maximum and minimum number of on-time trips
+The GIF illustrates a post-COVID decline in on-time performance across all boroughs from 2020 to 2022. Queens shows the strongest recovery trend, outperforming others by 2024. Brooklyn experiences the steepest decline and slowest rebound. The Bronx and Manhattan show moderate recovery post-2022.
+:::
+
+
+::: {.callout-tip title="Analyzing lines and Terminal"}
+
+### Identifying Lines with Maximum and Minimum On-Time Trips
+
+Calculating the total on-time trips for each subway line (excluding "Systemwide") to identify the best-performing line with the most on-time trips and the least-performing line with the fewest
 
 ```{r}
 
@@ -393,7 +378,11 @@ print(paste("The line with the minimum on-time trips is Line", min_on_time_line$
 
 ```
 
-### which Month has most and least on-time performance?
+Line 7 recorded the highest reliability with 893,206 on-time trips, indicating strong performance and operational efficiency. In contrast, Line S Rock had the lowest with 12,216 on-time trips, highlighting its limited service capacity or operational challenges.
+
+### Best and Worst Months for Terminal On-Time Performance
+
+This code calculates the average monthly terminal on-time performance to identify the best-performing and worst-performing months, providing insights into trends and operational efficiency over time.
 
 ```{r}
 
@@ -421,106 +410,13 @@ print(paste("The month with the lowest terminal on-time performance is", min_per
 
 ```
 
-### Yearly on-time performance trend from 2020 to 2024
+The highest terminal on-time performance occurred in May 2020 with 94%, likely due to reduced ridership during the early COVID period. In contrast, the lowest performance was in February 2024 at 78%, reflecting ongoing operational challenges and increased demand in the post-COVID recovery phase.
 
-To analyze the yearly terminal on-time performance trend from 2020 to 2024, I examined the average on-time performance for each year, highlighting how the subway system adapted during and after the COVID-19 pandemic.
 
-```{r}
-# Analyze the yearly on-time performance trend from 2020 to 2024
-mta_data |>
-  # Convert 'month' to Date format if not already in Date format
-  mutate(month = as.Date(month, format = "%Y-%m-%d")) |>
-  
-  # Extract the year from the 'month' column
-  mutate(year = format(month, "%Y")) |>
-  
-  # Calculate the average on-time performance for each year
-  group_by(year) |>
-  summarize(avg_terminal_on_time_performance = mean(terminal_on_time_performance, na.rm = TRUE)) |>
-  
-  # Plot the trend over years
-  ggplot(aes(x = as.numeric(year), y = avg_terminal_on_time_performance)) +
-  geom_line(color = "blue") +
-  geom_point(color = "blue") +
-  labs(title = "Yearly Terminal On-Time Performance Trend (2020-2024)",
-       x = "Year",
-       y = "Average On-Time Performance (%)") +
-  theme_minimal()
-```
+::: 
+### Seasonal and Monthly Trends in Terminal On-Time Performance
 
-### Top 5 Reliable Subway Lines for 2020–2022
-
-```{r}
-# Convert 'month' column to Date format if it's not already
-mta_data <- mta_data |>
-  mutate(month = as.Date(month, format = "%Y-%m-%d")) |>
-  
-  # Extract the year from the 'month' column
-  mutate(year = as.numeric(format(month, "%Y")))
-
-# Function to calculate top 5 lines for a specific year
-get_top_5_lines <- function(data, year) {
-  data |>
-    filter(year == !!year & !is.na(terminal_on_time_performance)) |>
-    group_by(line) |>
-    summarize(avg_on_time_performance = mean(terminal_on_time_performance, na.rm = TRUE), .groups = "drop") |>
-    arrange(desc(avg_on_time_performance)) |>
-    slice_head(n = 5) |>
-    mutate(year = as.character(year))
-}
-
-# Calculate top 5 lines for 2020, 2021, and 2022
-top_5_2020 <- get_top_5_lines(mta_data, 2020)
-top_5_2021 <- get_top_5_lines(mta_data, 2021)
-top_5_2022 <- get_top_5_lines(mta_data, 2022)
-
-# Combine the results into one data frame
-top_lines_combined <- bind_rows(top_5_2020, top_5_2021, top_5_2022)
-
-# Plotting the top 5 lines for each year
-ggplot(top_lines_combined, aes(x = reorder(line, avg_on_time_performance), 
-                               y = avg_on_time_performance, fill = year)) +
-  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) +
-  labs(title = "Top 5 Reliable Subway Lines for 2020–2022",
-       x = "Subway Line",
-       y = "Average On-Time Performance (%)",
-       fill = "Year") +
-  scale_fill_manual(values = c("2020" = "blue", "2021" = "orange", "2022" = "green")) +
-  coord_flip() +
-  theme_minimal() +
-  theme(legend.position = "top",
-        axis.text.x = element_text(angle = 45, hjust = 1))
-
-```
-
-### How has the overall terminal on-time performance trended each month from 2020 to 2024?
-
-```{r}
-
-# Calculate the average on-time performance for each month across all lines
-monthly_performance <- mta_data |>
-  group_by(month = format(month, "%Y-%m")) |>
-  summarize(avg_terminal_on_time_performance = mean(terminal_on_time_performance, na.rm = TRUE)) |>
-  mutate(month = as.Date(paste0(month, "-01"), format = "%Y-%m-%d"))
-
-# Add a column to indicate the period (COVID vs Post-COVID)
-monthly_performance <- monthly_performance |>
-  mutate(period = ifelse(format(month, "%Y") %in% c("2020", "2021"), "COVID Period (2020-2021)", "Post-COVID Recovery (2022-2024)"))
-
-# Plot the monthly trend with different colors for each period
-ggplot(monthly_performance, aes(x = month, y = avg_terminal_on_time_performance, color = period)) +
-  geom_line(size = 1.2) +
-  geom_point(size = 2) +
-  labs(title = "Monthly Terminal On-Time Performance Trend (2020-2024)",
-       x = "Month",
-       y = "Average On-Time Performance (%)",
-       color = "Period") +
-  theme_minimal() +
-  scale_x_date(date_labels = "%Y-%m", date_breaks = "3 months") +
-  scale_color_manual(values = c("COVID Period (2020-2021)" = "pink", "Post-COVID Recovery (2022-2024)" = "purple")) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-```
+This analysis reveals how terminal on-time performance varies by season and month, highlighting seasonal impacts, monthly trends, and periods needing targeted improvements.
 
 ```{r warning=FALSE, message=FALSE}
 # Extract month name, month number, and assign a season based on month
@@ -537,7 +433,7 @@ mta_data <- mta_data |>
 # Calculate the average on-time performance for each month across all years
 seasonal_performance <- mta_data |>
   group_by(month_name, month_num, season) |>
-  summarize(avg_on_time_performance = mean(terminal_on_time_performance, na.rm = TRUE)) |>
+  summarize(avg_on_time_performance = mean(terminal_on_time_performance, na.rm = TRUE), .groups = "drop") |>
   arrange(month_num)  # Arrange by month number for chronological order
 
 # Plot the seasonal/monthly trend with colors by season
@@ -553,91 +449,89 @@ ggplot(seasonal_performance, aes(x = reorder(month_name, month_num), y = avg_on_
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-### How did the on-time performance of the top 5 subway lines evolve over time from 2020 to 2024?
+Spring shows the highest performance, peaking in May, while Winter, especially February, records the lowest due to weather disruptions. Summer and Fall remain stable with minor fluctuations, highlighting winter as a key area for improvement.
+:::
+
+::: {.callout-tip title="Corelation Analysis"}
+
+### Analyzing the Impact of Total Scheduled Trips on On-Time Performance
+
+The aim of this analysis is to understand how the total number of scheduled trips influences the average on-time performance of NYC subway lines. By examining this relationship, we can assess whether higher operational loads negatively impact system efficiency and reliability
 
 ```{r}
-library(gganimate)
-library(gifski)
+# Summarize data: calculate total trips and average on-time performance
+trip_performance_summary <- mta_data %>%
+  group_by(month) %>%
+  summarize(
+    total_scheduled_trips = sum(num_sched_trips, na.rm = TRUE),
+    avg_on_time_performance = mean(terminal_on_time_performance, na.rm = TRUE)
+  )
 
-borough_mapping <- data.frame(
-  line = c("1", "1", "2", "2", "3", "3", "4", "4", "4", "5", 
-           "5", "6", "6", "7", "7", "A", "A", "B", "B", "B", 
-           "C", "C", "D", "D", "D", "E", "E", "F", "F", "F", 
-           "G", "G", "J", "J", "Z", "Z", "L", "L", "N", "N", 
-           "N", "Q", "Q", "R", "R", "R", "S Rock", "S Fkln", "S 42nd"),
-  borough = c("Manhattan", "Bronx", "Brooklyn", "Manhattan", 
-              "Brooklyn", "Manhattan", "Manhattan", "Brooklyn", 
-              "Bronx", "Brooklyn", "Manhattan", "Manhattan", 
-              "Bronx", "Manhattan", "Queens", "Manhattan", 
-              "Brooklyn", "Brooklyn", "Bronx", "Manhattan", 
-              "Manhattan", "Brooklyn", "Brooklyn", "Manhattan", 
-              "Bronx", "Queens", "Manhattan", "Manhattan","Queens", "Brooklyn", 
-              "Queens", "Brooklyn", "Manhattan", "Queens", 
-              "Manhattan", "Queens", "Manhattan", "Brooklyn", 
-              "Queens", "Manhattan", "Brooklyn", "Manhattan", 
-              "Brooklyn", "Queens", "Manhattan", "Brooklyn", 
-              "Manhattan", "Brooklyn", "Manhattan")
-)
-
-# Merge borough information with the MTA data
-mta_data_joined <- mta_data |>
-  inner_join(borough_mapping, by = "line") |>
-  filter(!is.na(borough), !is.na(terminal_on_time_performance)) # Remove NAs
-
-
-# Calculate average on-time performance by borough and year
-avg_performance_by_borough_year <- mta_data_joined |>
-  group_by(borough, year) |>
-  summarize(avg_performance = mean(terminal_on_time_performance, na.rm = TRUE), .groups = "drop")
-
-# Create a line chart to visualize the trends
-ggplot(avg_performance_by_borough_year, aes(x = year, y = avg_performance, color = borough)) +
-  geom_line() +
-  geom_point() +
+# Plot the relationship between total trips and on-time performance
+ggplot(trip_performance_summary, aes(x = total_scheduled_trips, y = avg_on_time_performance)) +
+  geom_point(color = "blue", size = 3, alpha = 0.6) +
+  geom_smooth(method = "lm", formula =  'y ~ x', color = "red", se = TRUE) +
   labs(
-    title = "Average Terminal On-Time Performance by Borough (2020-2024)",
-    x = "Year",
+    title = "Impact of Total Scheduled Trips on On-Time Performance",
+    x = "Total Scheduled Trips",
     y = "Average On-Time Performance (%)"
   ) +
   theme_minimal()
+
 ```
+
+The analysis reveals that as total scheduled trips increase, the on-time performance decreases, indicating that higher operational loads likely lead to more delays and reduced efficiency in maintaining schedule
+
+### Corelation between total scheduled trips and on-time trips
+This analysis explores the relationship between total scheduled trips and total on-time trips for NYC subway divisions. A strong positive correlation is visualized, highlighting how operational efficiency scales with scheduling demands.
 
 ```{r}
-# Load required libraries
-# Load required libraries
-library(ggplot2)
-library(dplyr)
-library(gganimate)
+# Extract year from the 'month' column (assuming it's in YYYY-MM-DD format)
+mta_data$Year <- year(as.Date(mta_data$month, format = "%Y-%m-%d"))
 
-# Calculate average on-time performance by borough and year
-avg_performance_by_borough_year <- mta_data_joined |>
-  group_by(borough, year) |>
-  summarize(avg_performance = mean(terminal_on_time_performance, na.rm = TRUE), .groups = "drop")
+correlation_data <- mta_data %>%
+  group_by(division, Year) %>%
+  summarise(
+    Total_Scheduled_Trips = sum(num_sched_trips, na.rm = TRUE),
+    Total_On_Time_Trips = sum(num_on_time_trips, na.rm = TRUE), .groups = "drop"
+  )
 
-# Create a line chart with animation
-animated_plot <-ggplot(avg_performance_by_borough_year, aes(x = year, y = avg_performance, color = borough)) +
-  geom_line(linewidth = 1.2) +
-  geom_point(size = 2) +
+# Compute correlation coefficient
+correlation_value <- cor(
+  correlation_data$Total_Scheduled_Trips,
+  correlation_data$Total_On_Time_Trips,
+  use = "complete.obs"
+)
+
+
+# Scatter Plot with Regression Line
+ggplot(correlation_data, aes(x = Total_Scheduled_Trips, y = Total_On_Time_Trips)) +
+  geom_point(aes(color = division), size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", formula = 'y ~ x', color = "blue", se = FALSE) +
   labs(
-    title = "Average Terminal On-Time Performance by Borough (2020-2024)",
-    x = "Year",
-    y = "Average On-Time Performance (%)",
-    color = "Borough"
+    title = "Correlation Between Scheduled and On-Time Trips",
+    subtitle = paste("Correlation Coefficient:", round(correlation_value, 2)),
+    x = "Total Scheduled Trips",
+    y = "Total On-Time Trips",
+    color = "Division"
   ) +
   theme_minimal() +
-  transition_reveal(year) # Animation based on year
-
-# Render the animation
-# animated_gif <- animate(animated_plot, nframes = 40, fps = 5, width = 800, height = 600, renderer = gifski_renderer())
-
-anim_save("avg_performance_trend.gif", animated_plot)
+  scale_x_continuous(labels = scales::comma) +
+  scale_y_continuous(labels = scales::comma)
 ```
-
-![Average Terminal On-Time Performance by Borough (2020-2024)](avg_performance_trend.gif)
-
+The scatter plot visualizes the strong positive correlation (r = 0.98) between total scheduled trips and on-time trips for NYC subway divisions (A and B). The blue regression line confirms that as scheduled trips increase, on-time trips also rise proportionally, indicating efficient handling of operational demands. Division-level clustering highlights performance differences, with both divisions maintaining high reliability.
+:::
 
 ### Key Takeaways:
 
-1.Lines such as GS, S 42nd, and FS emerged as the most reliable across all periods. 2.The system demonstrated resilience, with significant recovery post-COVID despite ongoing challenges. 3.Seasonal and monthly trends offer actionable insights into performance variations that can guide future operational strategies.
+• Reduced ridership during 2020–2021 led to a peak on-time performance of 94% in May 2020, showcasing the benefits of lower operational stress.
 
-These findings align with the broader project objective of understanding how delays, on-time performance, and safety incidents influenced NYC subway efficiency. This analysis provides a foundation for exploring further borough-specific or external factors impacting performance.
+• Recovery in 2022–2024 saw fluctuating performance, with on-time rates dropping to 78% in February 2024 due to increased ridership and system strain.
+
+• Winter months like February consistently recorded the lowest performance (78%), while spring months like May achieved the highest reliability (94%).
+
+• Queens recovered strongly post-COVID, while Brooklyn faced the steepest declines, indicating borough-specific operational and infrastructural challenges.
+
+• Higher scheduled trips correlated with decreased on-time performance, emphasizing the strain of scaling operations during peak periods.
+
+• Reliable lines like GS and S 42nd maintained over 99% on-time performance, serving as benchmarks, while underperforming lines like S Rock revealed areas needing improvement.
