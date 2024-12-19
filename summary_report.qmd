@@ -113,7 +113,7 @@ Let's identify seasonal and monthly trends. The goal is to highlight how externa
 
 The seasonal analysis shows distinct trends. Winter has variability, with a dip in February and recovery in December due to weather. Spring performs best, steadily improving to peak in May. Summer stays stable with a small drop in July and recovery in August. 
 
-Please go to this \[On-Terminal Performance(2020-2024)\](topic-https://nikitagtm.github.io/STA9750-2024-FALL/individual_report.html)for more detailed analysis.
+Please go to this [On-Terminal Performance(2020-2024)](https://nikitagtm.github.io/STA9750-2024-FALL/individual_report.html) for more detailed analysis.
 
 ### What is the relationship between ridership and wait times, and does higher ridership correlate with longer wait times?
 
