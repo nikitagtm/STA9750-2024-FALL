@@ -445,7 +445,7 @@ The graph shows higher on-time performance in spring, particularly in May, and l
 
 :::
 
-::: {.callout-tip title="Corelation Analysis"}
+::: {.callout-tip title="Correlation Analysis"}
 
 ### Analyzing the Impact of Total Scheduled Trips on On-Time Performance
 This analysis aims to explore how the total number of scheduled trips affects the average on-time performance of NYC subway lines, assessing whether higher operational loads impact efficiency and reliability.
