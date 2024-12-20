@@ -193,9 +193,9 @@ This analysis compares total on-time trips on weekdays and weekends to reveal di
 ```{r}
 
 # Summarize data by day_type (Weekdays vs Weekends)
-weekend_weekday_summary <- mta_data %>%
-  group_by(day_type) %>%
-  summarise(Total_On_Time_Trips = sum(num_on_time_trips, na.rm = TRUE)) %>%
+weekend_weekday_summary <- mta_data |>
+  group_by(day_type) |>
+  summarise(Total_On_Time_Trips = sum(num_on_time_trips, na.rm = TRUE)) |>
   arrange(desc(Total_On_Time_Trips))
 
 
@@ -451,8 +451,8 @@ The graph shows higher on-time performance in spring, particularly in May, and l
 This analysis aims to explore how the total number of scheduled trips affects the average on-time performance of NYC subway lines, assessing whether higher operational loads impact efficiency and reliability.
 ```{r}
 # Summarize data: calculate total trips and average on-time performance
-trip_performance_summary <- mta_data %>%
-  group_by(month) %>%
+trip_performance_summary <- mta_data |>
+  group_by(month) |>
   summarize(
     total_scheduled_trips = sum(num_sched_trips, na.rm = TRUE),
     avg_on_time_performance = mean(terminal_on_time_performance, na.rm = TRUE)
@@ -479,8 +479,8 @@ This analysis calculates and visualizes the correlation between total scheduled 
 # Extract year from the 'month' column (assuming it's in YYYY-MM-DD format)
 mta_data$Year <- year(as.Date(mta_data$month, format = "%Y-%m-%d"))
 
-correlation_data <- mta_data %>%
-  group_by(division, Year) %>%
+correlation_data <- mta_data |>
+  group_by(division, Year) |>
   summarise(
     Total_Scheduled_Trips = sum(num_sched_trips, na.rm = TRUE),
     Total_On_Time_Trips = sum(num_on_time_trips, na.rm = TRUE), .groups = "drop"
