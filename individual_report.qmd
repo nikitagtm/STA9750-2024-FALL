@@ -473,7 +473,7 @@ ggplot(trip_performance_summary, aes(x = total_scheduled_trips, y = avg_on_time_
 
 The graph shows that as total scheduled trips increase, average on-time performance decreases, indicating that higher operational loads may lead to delays and reduced efficiency across subway lines.
 
-### Corelation between total scheduled trips and on-time trips
+### Correlation between total scheduled trips and on-time trips
 This analysis calculates and visualizes the correlation between total scheduled trips and on-time trips for NYC subway divisions, highlighting their relationship over time with a scatter plot and regression line.
 ```{r}
 # Extract year from the 'month' column (assuming it's in YYYY-MM-DD format)
